@@ -72,4 +72,49 @@ if ~isempty(atlasViewer)
 end
 
 SD = updateProbe2DcircularPts(probe, SD);
+SD = convert2Doptodes(SD, probe);
+
+
+
+
+% ----------------------------------------------------------------
+function SD = convert2Doptodes(SD, probe) 
+if ~isempty(probe.srcpos2d)
+    SD.SrcPos = probe.srcpos2d;
+elseif isProbeFlat(probe.srcpos)
+    SD.SrcPos = probe.srcpos;
+end
+if ~isempty(probe.detpos2d)
+    SD.DetPos = probe.detpos2d;
+elseif isProbeFlat(probe.detpos)
+    SD.DetPos = probe.detpos;
+end
+if ~isempty(probe.registration.dummypos2d)
+    SD.DummyPos = probe.registration.dummypos2d;
+elseif isProbeFlat(probe.registration.dummypos)
+    SD.DummyPos = probe.registration.dummypos;
+end
+
+
+
+
+% ----------------------------------------------------------------
+function b = isProbeFlat(optpos)
+b = [];
+if isempty(optpos)
+    return
+end
+b = false;
+ndim = size(optpos, 2);
+ncoord = ndim;
+for ii = 1:ncoord
+    if length(unique(optpos(:,ii)))==1
+        ndim = ndim-1;
+    end
+end
+if ndim<3
+    b = true;
+end
+
+
 

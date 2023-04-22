@@ -2112,7 +2112,6 @@ set(hCortexProjection,'visible','off');
 % Generate rays from optodes on head to optodes on cortex and
 % highlight the faces on the label that they pass through.
 faceVertexCData = get(pialsurf.handles.surf,'faceVertexCData');
-faceVertexAlphaData = get(pialsurf.handles.surf,'faceVertexAlphaData');
 iFaces = [];
 for ii=1:size(ptsProj,1)
     p1 = ptsProj(ii,:);
@@ -2251,13 +2250,9 @@ set(handles.checkbox_Display_MNI_Projection, 'value',0);
 
 
 % --------------------------------------------------------------------
-function checkbox_Display_MNI_Projection_Callback(hObject, eventdata, handles)
+function checkbox_Display_MNI_Projection_Callback(hObject, ~, ~)
 global atlasViewer
 
-fwmodel    = atlasViewer.fwmodel;
-headvol    = atlasViewer.headvol; 
-labelssurf = atlasViewer.labelssurf; 
-headvol    = atlasViewer.headvol; 
 headsurf   = atlasViewer.headsurf;
  
 if get(hObject,'value')==1 % if checkbox is checked
@@ -2306,7 +2301,6 @@ if get(hObject,'value')==1 % if checkbox is checked
     h2 = findobj('Marker','o');
     set(h2,'Visible','off');
     
-    headvol   = atlasViewer.headvol;
     vertices  = atlasViewer.labelssurf.mesh.vertices;
     
     % Project MNI in MC space to head surface and pial surface
@@ -2319,7 +2313,6 @@ if get(hObject,'value')==1 % if checkbox is checked
         
         p1 = coordinate_MC_headsurf;
         p2 = coordinate_MC_cortex;
-        hProjectionRays = drawRayProjection(p1,p2,headsurf);
         hold on;
         plot3(coordinate_MC_cortex(2),coordinate_MC_cortex(1),coordinate_MC_cortex(3),'bo','MarkerSize',15,'MarkerFaceColor','b');
         hold off;
@@ -2488,7 +2481,7 @@ uipanelBrainDisplay_Callback(pialsurf.handles.radiobuttonShowPial, [], handles);
 
 
 % --------------------------------------------------------------------
-function popupmenuImageDisplay_CreateFcn(hObject, eventdata, handles)
+function popupmenuImageDisplay_CreateFcn(hObject, ~, ~)
 global popupmenuorder;
 
 popupmenuorder = struct(...
@@ -2715,7 +2708,7 @@ atlasViewer.fwmodel = fwmodel;
 
 
 % --------------------------------------------------------------------
-function pushbuttonCalcMetrics_new_Callback(hObject, eventdata, handles)
+function pushbuttonCalcMetrics_new_Callback(~, ~, handles)
 global atlasViewer
 
 imgrecon     = atlasViewer.imgrecon;
@@ -2743,8 +2736,7 @@ atlasViewer.imgrecon = imgrecon;
 
 
 % --------------------------------------------------------------------
-function menuItemImageReconGUI_Callback(hObject, eventdata, handles)
-global atlasViewer
+function menuItemImageReconGUI_Callback(~, ~, ~)
 ImageRecon();
 
 
@@ -2884,7 +2876,7 @@ atlasViewer.probe = probe;
 
 
 % --------------------------------------------------------------------
-function closeProjectionTbl(hObject, eventdata)
+function closeProjectionTbl(~, ~)
 global atlasViewer
 
 probe = atlasViewer.probe;
@@ -2906,7 +2898,7 @@ AtlasViewerGUI(dirnameSubj, dirnameAtlas, 'userargs');
 
 
 % --------------------------------------------------------------------
-function editViewAnglesAzimuth_Callback(hObject, eventdata, handles)
+function editViewAnglesAzimuth_Callback(hObject, ~, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -2940,7 +2932,7 @@ updateViewAngles(ii, az, el);
 
 
 % --------------------------------------------------------------------
-function editViewAnglesElevation_Callback(hObject, eventdata, handles)
+function editViewAnglesElevation_Callback(hObject, ~, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -2974,7 +2966,7 @@ updateViewAngles(ii, az, el);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsAnterior_Callback(hObject, eventdata, handles)
+function pushbuttonStandardViewsAnterior_Callback(hObject, ~, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -3007,7 +2999,7 @@ updateViewAngles(ii, 180, 0);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsPosterior_Callback(hObject, eventdata, handles)
+function pushbuttonStandardViewsPosterior_Callback(hObject, ~, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -3041,7 +3033,7 @@ updateViewAngles(ii, 0, 0);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsRight_Callback(hObject, eventdata, handles)
+function pushbuttonStandardViewsRight_Callback(hObject, ~, handles)
 
 global atlasViewer
 
@@ -3077,7 +3069,7 @@ updateViewAngles(ii, 90, 0);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsLeft_Callback(hObject, eventdata, handles)
+function pushbuttonStandardViewsLeft_Callback(hObject, ~, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -3112,7 +3104,7 @@ updateViewAngles(ii, -90, 0);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsSuperior_Callback(hObject, eventdata, handles)
+function pushbuttonStandardViewsSuperior_Callback(hObject, ~, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -3214,7 +3206,7 @@ RefptsSystemConfigGUI();
 
 
 % --------------------------------------------------------------------
-function radiobuttonHeadDimensions_Callback(hObject, eventdata, handles)
+function radiobuttonHeadDimensions_Callback(hObject, ~, ~)
 
 global atlasViewer
 
@@ -3425,12 +3417,6 @@ atlasViewer.digpts       = digpts;
 atlasViewer.fwmodel      = fwmodel;
 atlasViewer.imgrecon     = imgrecon;
 
-
-% --------------------------------------------------------------------
-% function menuItemProbeEdit_Callback(~, ~, ~)
-% global atlasViewer
-% SD = convertProbe2SD(atlasViewer.probe);
-% SDgui(SD);
 
 
 % --------------------------------------------------------------------
@@ -5112,17 +5098,8 @@ displayProbeOnUnitCircle(atlasViewer.probe, 'numbers')
 
 
 
-
-
-% --- Executes on selection change in popupmenu_changeOptodeNumberTo.
-function popupmenu_changeOptodeNumberTo_Callback(hObject, eventdata, handles)
-% hObject    handle to popupmenu_changeOptodeNumberTo (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-% Hints: contents = cellstr(get(hObject,'String')) returns popupmenu_changeOptodeNumberTo contents as cell array
-%        contents{get(hObject,'Value')} returns selected item from popupmenu_changeOptodeNumberTo
-
+% --------------------------------------------------------------------
+function popupmenu_changeOptodeNumberTo_Callback(hObject, ~, handles)
 global atlasViewer
 nrsc = atlasViewer.probe.nsrc;
 ndet = atlasViewer.probe.ndet;
@@ -5218,32 +5195,12 @@ probe = displyMeasChannels_editOptode(probe,ia(m_idx));
 atlasViewer.probe = probe;
 
 
-% --- Executes during object creation, after setting all properties.
-function popupmenu_changeOptodeNumberTo_CreateFcn(hObject, eventdata, handles)
-% hObject    handle to popupmenu_changeOptodeNumberTo (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    empty - handles not created until after all CreateFcns called
-
-% Hint: popupmenu controls usually have a white background on Windows.
-%       See ISPC and COMPUTER.
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
+% --------------------------------------------------------------------
+function menuItemupdateOptodeNumbers_Callback(~, ~, ~)
 
 
 % --------------------------------------------------------------------
-function menuItemupdateOptodeNumbers_Callback(hObject, eventdata, handles)
-% hObject    handle to menuItemupdateOptodeNumbers (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
-
-% --------------------------------------------------------------------
-function menuItemUpdateSourceNumbers_Callback(hObject, eventdata, handles)
-% hObject    handle to menuItemUpdateSourceNumbers (see GCBO)
-% eventdata  reserved - to be defined in a future version of MATLAB
-% handles    structure with handles and user data (see GUIDATA)
-
+function menuItemUpdateSourceNumbers_Callback(~, ~, ~)
 prompt = {'Enter source and updated source pairs sepearted by semi colon'};
 dlgtitle = 'Update source numbers';
 dims = [5 50];
@@ -5251,24 +5208,31 @@ answer = inputdlg(prompt,dlgtitle,dims);
 answer
 
 
+% --------------------------------------------------------------------
+function menuItemUpdateDetectorNumbers_Callback(~, ~, ~)
+
+
 
 % --------------------------------------------------------------------
-function menuItemUpdateDetectorNumbers_Callback(hObject, eventdata, handles)
-
-
-
-% --------------------------------------------------------------------
-function menuItemGenerateProbeFromRefpts_Callback(~, eventdata, ~)
+function menuItemGenerateProbeFromRefpts_Callback(~, ~, ~)
 global atlasViewer
-s = SnirfClass();
-
-optpos = genProbeFromRefpts(atlasViewer.refpts);
-percentSrcs = 33;
-nOptodes = length(optpos);
-nsrc = floor(nOptodes * percentSrcs/100);
-ndet = nOptodes - nsrc;
-
-s.probe.sourcePos3D = atlasViewer.refpts.pos;
-s.probe.detectorPos3D = atlasViewer.refpts.pos;
-
+dt = inputdlg('dource/detector distance threshold');
+if isempty(dt)
+    dt = 30;
+else
+    dt = {dt};
+end
+[srcpos, detpos, ml] = genProbeFromRefpts(atlasViewer.refpts.pos, dt);
+[fname, pname] = uiputfile({'*.SD','*.nirs';'*.snirf'});
+[~, ext] = fileparts(fname);
+switch(ext)
+    case {'.nirs', '.SD'}
+        SD.SrcPos = srcpos;
+        SD.DetPos = detpos;
+        SD.MeasList = ml;
+        n = NirsClass(SD);
+        SD = n.SD; %#ok<NASGU>
+        save([pname, fname],'-mat','SD');
+    case '.snirf'
+end
 

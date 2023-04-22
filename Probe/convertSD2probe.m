@@ -67,20 +67,24 @@ end
 probe.optpos = [probe.srcpos; probe.detpos; probe.registration.dummypos];
 probe = setNumberOfOptodeTypes(probe, SD);
 
+probe = convert2Doptodes(probe, SD);
+
+
 
 
 
 % ----------------------------------------------------------------
-function probe = save2Doptodes(probe, SD) 
+function probe = convert2Doptodes(probe, SD) 
+if ~isempty(SD.SrcPos)
+    probe.srcpos2d = SD.SrcPos;
+end
+if ~isempty(SD.DetPos)
+    probe.detpos2d = SD.DetPos;
+end
+if ~isempty(SD.DummyPos)
+    probe.registration.dummypos2d = SD.DummyPos;
+end
 
-if ~isempty(SD.SrcPos2D)
-    probe.srcpos = SD.SrcPos2D;
-end
-if ~isempty(SD.DetPos2D)
-    probe.detpos = SD.DetPos2D;
-end
-if ~isempty(SD.DummyPos2D)
-    probe.registration.dummypos = SD.DummyPos2D;
-end
+
 
 

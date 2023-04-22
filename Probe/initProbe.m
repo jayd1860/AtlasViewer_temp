@@ -128,6 +128,7 @@ if exist('handles','var')
 end
 
 
+
 % --------------------------------------------------------------
 function b = isempty_loc(probe)
 b = true;
@@ -188,6 +189,12 @@ if ~isempty(probe2.srcpos) && isempty(probe.srcpos)
 end
 if ~isempty(probe2.detpos) && isempty(probe.detpos)
     probe.detpos        = probe2.detpos;
+end
+if ~isempty(probe2.srcpos2d) && isempty(probe.srcpos2d)
+    probe.srcpos2d        = probe2.srcpos2d;
+end
+if ~isempty(probe2.detpos2d) && isempty(probe.detpos2d)
+    probe.detpos2d        = probe2.detpos2d;
 end
 if ~isempty(probe2.optpos_reg) && isempty(probe.optpos_reg)
     probe.optpos_reg    = probe2.optpos_reg;
@@ -325,6 +332,7 @@ end
 probe1.registration.sl              = probe2.registration.sl;
 probe1.registration.al              = probe2.registration.al;
 probe1.registration.dummypos        = probe2.registration.dummypos;
+probe1.registration.dummypos2d      = probe2.registration.dummypos2d;
 probe1.registration.springLenThresh = probe2.registration.springLenThresh;
 
 

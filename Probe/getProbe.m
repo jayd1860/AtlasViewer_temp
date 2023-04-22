@@ -41,7 +41,7 @@ probe.pathname = dirname;
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % 1. Load probe data from the various possible sources
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-probe_data      = loadFromData(dirname, dataTree);
+probe_data      = loadFromData(dataTree);
 
 % if probe_data is complete then we are done no more complexity dealing with other sources of probe info
 probe_digpts    = loadProbeFromDigpts(digpts);
@@ -113,6 +113,7 @@ probe = checkMeasList(probe);
 
 % -------------------------------------------
 function probe = loadFromSDFiles(dirname, varargin)
+SD = [];
 
 % Arg 2: Extract all the probes from varargin agianst which the SD probes have to
 % be compared for compatability
@@ -139,6 +140,11 @@ elseif length(files) > 1
     filedata = load([pathname filename], '-mat');
     probe = loadSD(probe, filedata.SD);
     probe.filename_to_save = filename(1:end-3);
+elseif existDotNirsFiles(dirname)
+    files = getDotNirsFiles(dirname);
+    filedata = load([files(1).folder, files(1).name], '-mat');
+    probe = loadSD(probe, filedata.SD);
+    probe.filename_to_save = filename(1:end-4);
 end
 
 % % Load probe into the array output parameter from the default SD files
@@ -207,7 +213,7 @@ end
 
 
 % -------------------------------------------
-function probe = loadFromData(dirname, dataTree)
+function probe = loadFromData(dataTree)
 probe = initProbe();
 SD = [];
 
@@ -215,19 +221,6 @@ SD = [];
 if ~isempty(dataTree) && ~dataTree.IsEmpty()
     SD = extractSDFromDataTree(dataTree);
     % Check if probe exists in old-style Homer processing files
-elseif exist([dirname, 'groupResults.mat'], 'file')
-    filedata = load([dirname, 'groupResults.mat'], '-mat');
-    SD = getSD(filedata.group);
-    
-    % Check if probe exists in old-style acquisition files
-elseif existDotNirsFiles(dirname)
-    files = getDotNirsFiles(dirname);
-    filedata = load([files(1).folder, files(1).name], '-mat');
-    SD = sd_data_Copy(SD, filedata.SD);
-    
-end
-if isempty(SD)
-    return
 end
 probe = loadSD(probe, SD);
 
