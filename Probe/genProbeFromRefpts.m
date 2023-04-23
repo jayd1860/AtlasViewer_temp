@@ -9,17 +9,17 @@ if ~exist('dt','var')
     dt = 30;
 end
 iOptExcl = [];
-iOptDetNext = 1;
+iOptSrcNext = 1;
 iSrc = 1;
-iDet = 1;
+iDet = 0;
 srcpos = zeros(size(optpos));
 detpos = zeros(size(optpos));
-dm = distmatrix(optpos);
-N = size(optpos,1);
+dm     = distmatrix(optpos);
+N      = size(optpos,1);
 while 1
     % Find next source
     k = [];
-    for jj = iOptDetNext:N
+    for jj = iOptSrcNext:N
         if ~ismember(jj, iOptExcl)
             k = jj;
             break;
@@ -28,40 +28,56 @@ while 1
     if isempty(k)
         break;
     end
-    iOptDetNext = k;
+    iOptSrcNext = k;
     
     % Add source
-    srcpos(iSrc,:) = optpos(iOptDetNext,:);
+    srcpos(iSrc,:) = optpos(iOptSrcNext,:);
         
     % Find detectors
-    k1 = find((dm(iOptDetNext,:)>0) & (dm(iOptDetNext,:)<dt));
-    k2 = find((dm(:,iOptDetNext)>0) & (dm(:,iOptDetNext)<dt));
-    k = [k1,k2];
+    k1 = find((dm(iOptSrcNext,:)>0) & (dm(iOptSrcNext,:)<dt));
+    k2 = find((dm(:,iOptSrcNext)>0) & (dm(:,iOptSrcNext)<dt));
+    k = [k1(:)',k2(:)'];
     k(ismember(k, iOptExcl)) = [];
-    
+    idxsNew = iDet+1:iDet+length(k);
+        
     % Add detectors
-    detpos(iDet:iDet+length(k)-1,:) = optpos(k,:);
-    iDet = iDet+length(k);
+    detpos(idxsNew,:) = optpos(k,:);
     
     % Add to list of excluded optode indices
-    iOptExcl = unique([iOptExcl, iOptDetNext, k]);
+    iOptExcl = unique([iOptExcl, iOptSrcNext, k]);
 
     % Add to measurement list
     n = size(ml,1);
-    for ii = n+1:n+length(k)
-        ml(ii,:) = [iSrc, k(ii-n)];
+    for ii = 1:length(idxsNew)
+        ml(n+ii,:) = [iSrc, idxsNew(ii)];
     end
 
     iSrc = iSrc+1;
+    iDet = iDet+length(idxsNew);
 
 end
 srcpos(iSrc:end,:) = [];
-detpos(iDet:end,:) = [];
+detpos(iDet+1:end,:) = [];
+ml = [ml, ones(size(ml,1),2)];
 
-% if iSrc > iDet
-%     detposTemp = detpos;
-%     detpos = srcpos;
-%     srcpos = detposTemp;
-%     ml = [ml(:,2), ml(:,1)];
-% end
+[srcpos, ml] = squeezeOptodes(srcpos, ml, 1);
+[detpos, ml] = squeezeOptodes(detpos, ml, 2);
+
+
+
+
+% --------------------------------------------------
+function [optpos, ml] = squeezeOptodes(optpos, ml, idx)
+
+% Remove unused optodes
+d = diff(ml(:,1));
+for ii = 1:length(d)
+    if d(ii)>1
+        k = unique(ml(ii,idx)+1:ml(ii+1,idx)-1);
+        optpos(k,:) = [];
+        ml(ii+1:end,1) = ml(ii+1:end,1) - (d(ii)-1);
+    end
+end
+
+
 

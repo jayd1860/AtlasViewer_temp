@@ -48,7 +48,7 @@ else
         end
         
         if strcmpi(ext, '.sd')
-        save([pathname, filename],'SD','-mat');
+            save([pathname, filename],'SD','-mat');
         elseif strcmpi(ext, '.snirf')
             n = NirsClass(SD);
             s2 = SnirfClass(n);
