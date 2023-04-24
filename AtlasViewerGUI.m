@@ -5216,23 +5216,36 @@ function menuItemUpdateDetectorNumbers_Callback(~, ~, ~)
 % --------------------------------------------------------------------
 function menuItemGenerateProbeFromRefpts_Callback(~, ~, ~)
 global atlasViewer
-dt = inputdlg('dource/detector distance threshold');
-if isempty(dt)
+dt = inputdlg('Source/Detector distance threshold');
+if isempty(dt) || isempty(dt{1})
     dt = 30;
 else
-    dt = {dt};
+    dt = str2num(dt{1});
 end
 [srcpos, detpos, ml] = genProbeFromRefpts(atlasViewer.refpts.pos, dt);
-[fname, pname] = uiputfile({'*.SD','*.nirs';'*.snirf'});
-[~, ext] = fileparts(fname);
-switch(ext)
-    case {'.nirs', '.SD'}
+[fname, pname] = uiputfile({'*.SD';'*.nirs';'*.snirf'});
+pause(.2);
+if length(fname)==1 && fname==0
+    fname = [filesepStandard(pwd), 'probe.SD'];
+end
+fnameFull = [filesepStandard(pname), fname];
+[~, ~, ext] = fileparts(fnameFull);
+nW = length(unique(ml(:,4)));
+SD.Lambda = zeros(1,nW);
         SD.SrcPos = srcpos;
         SD.DetPos = detpos;
         SD.MeasList = ml;
+switch(ext)
+    case {'.nirs', '.SD'}
         n = NirsClass(SD);
-        SD = n.SD; %#ok<NASGU>
-        save([pname, fname],'-mat','SD');
+        if strcmp(ext, '.nirs')
+            n.Save(fnameFull);
+        else
+            SD = n.SD;
+            save(fnameFull,'-mat','SD');
+        end
     case '.snirf'
+        s = SnirfClass(SD);
+        s.Save(fnameFull)
 end
 

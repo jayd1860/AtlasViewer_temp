@@ -15,5 +15,3 @@ n = NirsClass(SD);
 SD = n.SD;
 save('probe_try1.nirs','-mat','SD');
 
-
-

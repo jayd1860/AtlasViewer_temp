@@ -113,7 +113,6 @@ probe = checkMeasList(probe);
 
 % -------------------------------------------
 function probe = loadFromSDFiles(dirname, varargin)
-SD = [];
 
 % Arg 2: Extract all the probes from varargin agianst which the SD probes have to
 % be compared for compatability
@@ -144,7 +143,7 @@ elseif existDotNirsFiles(dirname)
     files = getDotNirsFiles(dirname);
     filedata = load([files(1).folder, files(1).name], '-mat');
     probe = loadSD(probe, filedata.SD);
-    probe.filename_to_save = filename(1:end-4);
+    probe.filename_to_save = files(1).name(1:end-3);
 end
 
 % % Load probe into the array output parameter from the default SD files

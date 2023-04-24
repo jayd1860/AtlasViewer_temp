@@ -70,14 +70,18 @@ ml = [ml, ones(size(ml,1),2)];
 function [optpos, ml] = squeezeOptodes(optpos, ml, idx)
 
 % Remove unused optodes
-d = diff(ml(:,1));
+mlNew = ml;
+d = diff(ml(:,1))';
+k = [];
 for ii = 1:length(d)
     if d(ii)>1
-        k = unique(ml(ii,idx)+1:ml(ii+1,idx)-1);
-        optpos(k,:) = [];
-        ml(ii+1:end,1) = ml(ii+1:end,1) - (d(ii)-1);
+        knew = ml(ii,idx)+1 : ml(ii+1,idx)-1;
+        k = unique([k, knew]);
+        mlNew(ii+1:end,1) = mlNew(ii+1:end,1) - (d(ii)-1);
     end
 end
-
+k = unique([k, max(ml(:,idx))+1:size(optpos,1)]);
+optpos(k,:) = [];
+ml = mlNew;
 
 
