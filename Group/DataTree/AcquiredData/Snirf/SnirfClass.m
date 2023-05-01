@@ -665,7 +665,7 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
         
         % -------------------------------------------------------
         function SaveData(obj, fileobj)
-            for ii=1:length(obj.data)
+            for ii = 1:length(obj.data)
                 obj.data(ii).SaveHdf5(fileobj, [obj.location, '/data', num2str(ii)]);
             end
         end
@@ -713,7 +713,6 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
                 delete(fileobj);
             end
             obj.fid = H5F.create(fileobj, 'H5F_ACC_TRUNC', 'H5P_DEFAULT', 'H5P_DEFAULT');
-            H5F.close(obj.fid);
             
             %%%%% Save this object's properties
             
@@ -721,22 +720,25 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             if isempty(obj.formatVersion)
                 obj.formatVersion = '1.1';
             end
-            hdf5write_safe(fileobj, '/formatVersion', obj.formatVersion);
+            hdf5write_safe(obj.fid, '/formatVersion', obj.formatVersion);
             
             % Save metaDataTags
-            obj.SaveMetaDataTags(fileobj);
+            obj.SaveMetaDataTags(obj.fid);
             
             % Save data
-            obj.SaveData(fileobj);
+            obj.SaveData(obj.fid);
             
             % Save stim
-            obj.SaveStim(fileobj);
+            obj.SaveStim(obj.fid);
             
             % Save sd
-            obj.SaveProbe(fileobj);
+            obj.SaveProbe(obj.fid);
             
             % Save aux
-            obj.SaveAux(fileobj);
+            obj.SaveAux(obj.fid);
+            
+            H5F.close(obj.fid);
+
         end
         
         

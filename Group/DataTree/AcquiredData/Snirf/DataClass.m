@@ -205,6 +205,7 @@ classdef DataClass < FileLoadSaveClass
             elseif isempty(fileobj)
                 fileobj = obj.GetFilename();
             end
+            
             if isempty(fileobj)
                err = -1;
                return;
@@ -228,7 +229,8 @@ classdef DataClass < FileLoadSaveClass
         
         
         % -------------------------------------------------------
-        function SaveHdf5(obj, fileobj, location)
+        function err = SaveHdf5(obj, fileobj, location)
+            err = 0;
             if ~exist('fileobj', 'var') || isempty(fileobj)
                 error('Unable to save file. No file name given.')
             end
@@ -239,17 +241,18 @@ classdef DataClass < FileLoadSaveClass
             elseif location(1)~='/'
                 location = ['/',location];
             end
-            
-            if ~exist(fileobj, 'file')
-                fid = H5F.create(fileobj, 'H5F_ACC_TRUNC', 'H5P_DEFAULT', 'H5P_DEFAULT');
-                H5F.close(fid);
+
+            fid = HDF5_GetFileDescriptor(fileobj);
+            if fid < 0
+                err = -1;
+                return;
             end
             
-            hdf5write_safe(fileobj, [location, '/dataTimeSeries'], obj.dataTimeSeries, 'array');
-            hdf5write_safe(fileobj, [location, '/time'], obj.time, 'array');
+            hdf5write_safe(fid, [location, '/dataTimeSeries'], obj.dataTimeSeries, 'array');
+            hdf5write_safe(fid, [location, '/time'], obj.time, 'array');
             
             for ii=1:length(obj.measurementList)
-                obj.measurementList(ii).SaveHdf5(fileobj, [location, '/measurementList', num2str(ii)]);
+                obj.measurementList(ii).SaveHdf5(fid, [location, '/measurementList', num2str(ii)]);
             end
         end
         
