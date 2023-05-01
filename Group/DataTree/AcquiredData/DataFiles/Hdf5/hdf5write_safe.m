@@ -15,7 +15,7 @@ function err = hdf5write_safe(fname, name, val, options)
         force_scalar = true;
     end
     
-    % Identify type of val and use SNIRF v1.1-compliant write function
+    % Identify type of val and use SNIRF v1.1-complicdant write function
     if ischar(fname)
         if exist(fname,'file')
             fid = H5F.open(fname, 'H5F_ACC_RDWR', 'H5P_DEFAULT');
@@ -40,21 +40,21 @@ function err = hdf5write_safe(fname, name, val, options)
     
     if iscell(val) || isstring(val)
         if length(val) > 1 && ~force_scalar || force_array  % Returns true for single strings, believe it or not
-            write_string_array(fid, fname, name, val);
+            write_string_array(fname, name, val);
         else
             write_string(fid, fname, name, val);
         end
     elseif ischar(val)
-        write_string(fid, fname, name, val);
+        write_string(fid, name, val);
     elseif isfloat(val)
         if length(val) > 1 && ~force_scalar || force_array
             write_numeric_array(fname, name, val);
         else
-            write_numeric(fid, fname, name, val);
+            write_numeric(fname, name, val);
         end
     elseif isinteger(val)
         if length(val) > 1 && ~force_scalar || force_array
-            write_numeric_array(fid, fname, name, val);  % As of now, no integer arrays exist
+            write_numeric_array(fname, name, val);  % As of now, no integer arrays exist
         else
             write_integer(fid, fname, name, val);
         end
@@ -65,7 +65,7 @@ end
 
 
 
-function err = write_string(fid, fname, name, val)
+function err = write_string(fid, name, val)
     sid = H5S.create('H5S_SCALAR');
     tid = H5T.copy('H5T_C_S1');
     H5T.set_size(tid, 'H5T_VARIABLE');
@@ -74,7 +74,9 @@ function err = write_string(fid, fname, name, val)
     err = 0;
 end
 
-function err = write_string_array(fid, fname, name, val)
+
+
+function err = write_string_array(fid, name, val)
     val = HDF5_Transpose(val);
     sid = H5S.create_simple(1, numel(val), H5ML.get_constant_value('H5S_UNLIMITED'));
     tid = H5T.copy('H5T_C_S1');
@@ -86,7 +88,9 @@ function err = write_string_array(fid, fname, name, val)
     err = 0;
 end
 
-function err = write_numeric(fid, fname, name, val)
+
+
+function err = write_numeric(fname, name, val)
     fid = H5F.open(fname, 'H5F_ACC_RDWR', 'H5P_DEFAULT');
     tid = H5T.copy('H5T_NATIVE_DOUBLE');
     sid = H5S.create('H5S_SCALAR');
@@ -94,6 +98,7 @@ function err = write_numeric(fid, fname, name, val)
     h5write(fname, name, val);
     err = 0;
 end
+
 
 function err = write_numeric_array(fname, name, val)
     val = HDF5_Transpose(val);
@@ -108,7 +113,9 @@ function err = write_numeric_array(fname, name, val)
     err = 0;
 end
 
-function err = write_integer(fid, fname, name, val)
+
+function err = write_integer(fname, name, val)
+    fid = H5F.open(fname, 'H5F_ACC_RDWR', 'H5P_DEFAULT');
     warning off;  % Suppress the int truncation warning
     tid = H5T.copy('H5T_NATIVE_INT');
     sid = H5S.create('H5S_SCALAR');
