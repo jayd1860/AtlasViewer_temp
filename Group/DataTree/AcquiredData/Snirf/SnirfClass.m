@@ -666,7 +666,7 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
         % -------------------------------------------------------
         function SaveData(obj, fileobj)
             for ii = 1:length(obj.data)
-                obj.data(ii).SaveHdf5(fileobj, obj.fid, [obj.location, '/data', num2str(ii)]);
+                obj.data(ii).SaveHdf5(fileobj, [obj.location, '/data', num2str(ii)]);
             end
         end
         
@@ -735,7 +735,7 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
                 obj.SaveMetaDataTags(obj.fid);
                 
                 % Save data
-                obj.SaveData(fileobj);
+                obj.SaveData(obj.fid);
                 
                 % Save stim
                 obj.SaveStim(obj.fid);

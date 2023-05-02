@@ -10,18 +10,18 @@ function err = hdf5write_safe(fname, name, val, options)
     force_scalar = false;
     force_array = false;
     if any(strcmp(options, 'array'))
-        force_array = true;
+       force_array = true;
     elseif any(strcmp(options, 'scalar'))
         force_scalar = true;
     end
     
-    % Identify type of val and use SNIRF v1.1-complicdant write function
+    % Identify type of val and use SNIRF v1.1-compliant write function
     if ischar(fname)
-        if exist(fname,'file')
-            fid = H5F.open(fname, 'H5F_ACC_RDWR', 'H5P_DEFAULT');
-        else
-            fid = H5F.create(fname, 'H5F_ACC_TRUNC', 'H5P_DEFAULT', 'H5P_DEFAULT');
-        end
+    if exist(fname,'file')
+        fid = H5F.open(fname, 'H5F_ACC_RDWR', 'H5P_DEFAULT');
+    else
+        fid = H5F.create(fname, 'H5F_ACC_TRUNC', 'H5P_DEFAULT', 'H5P_DEFAULT');
+    end
     else
         fid = fname;
     end
@@ -48,21 +48,21 @@ function err = hdf5write_safe(fname, name, val, options)
         write_string(fid, name, val);
     elseif isfloat(val)
         if length(val) > 1 && ~force_scalar || force_array
-            write_numeric_array(fname, name, val);
+            write_numeric_array(fid, name, val);
         else
             write_numeric(fname, name, val);
         end
     elseif isinteger(val)
         if length(val) > 1 && ~force_scalar || force_array
-            write_numeric_array(fname, name, val);  % As of now, no integer arrays exist
+            write_numeric_array(fid, name, val);  % As of now, no integer arrays exist
         else
             write_integer(fid, fname, name, val);
         end
     else
         warning(['An unrecognized variable was saved to ', name, ' in ', fname])
-    end    
+    end
 end
-
+    
 
 
 function err = write_string(fid, name, val)
@@ -100,19 +100,20 @@ function err = write_numeric(fname, name, val)
 end
 
 
-function err = write_numeric_array(fname, name, val)
-    val = HDF5_Transpose(val);
-    sizeval = size(val);
-    if sizeval(1) == 1 || sizeval(2) == 1
-        n = length(val);
-    else
-        n = sizeval;
-    end
-    h5create(fname, name, n, 'Datatype', 'double');
-    h5write(fname, name, val);
-    err = 0;
-end
-
+% function err = write_numeric_array(fname, name, val)
+%     val = HDF5_Transpose(val);
+%     sizeval = size(val);
+%     if sizeval(1) == 1 || sizeval(2) == 1
+%         n = length(val);
+%     else
+%         n = sizeval;
+%     end
+%     h5create(fname, name, n, 'Datatype', 'double');
+%     h5write(fname, name, val);
+%     err = 0;
+% end
+% 
+% 
 
 function err = write_integer(fname, name, val)
     fid = H5F.open(fname, 'H5F_ACC_RDWR', 'H5P_DEFAULT');

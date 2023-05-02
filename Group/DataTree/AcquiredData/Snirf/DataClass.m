@@ -137,7 +137,7 @@ classdef DataClass < FileLoadSaveClass
                err = -1;
                return;
             end
-                        
+            
             try
                 % Open group
                 [gid, fid] = HDF5_GroupOpen(fileobj, location);
@@ -186,7 +186,7 @@ classdef DataClass < FileLoadSaveClass
         % -------------------------------------------------------
         function err = LoadTime(obj, fileobj, location)
             err = 0;
-
+                       
             % Arg 1
             if ~exist('fileobj','var') || (ischar(fileobj) && ~exist(fileobj,'file'))
                 fileobj = '';
@@ -210,7 +210,7 @@ classdef DataClass < FileLoadSaveClass
                err = -1;
                return;
             end
-                        
+            
             try
                 % Open group
                 [gid, fid] = HDF5_GroupOpen(fileobj, location);
@@ -221,13 +221,13 @@ classdef DataClass < FileLoadSaveClass
                 HDF5_GroupClose(fileobj, gid, fid);
             catch
                 err = -1;
-            end            
+            end
             err = ErrorCheck(obj, err, {'time'});
         end
         
         
         % -------------------------------------------------------
-        function err = SaveHdf5(obj, fileobj, fid, location)
+        function err = SaveHdf5(obj, fileobj, location)
             err = 0;
             if ~exist('fileobj', 'var') || isempty(fileobj)
                 error('Unable to save file. No file name given.')
@@ -240,8 +240,8 @@ classdef DataClass < FileLoadSaveClass
                 location = ['/',location];
             end
             
-            hdf5write_safe(fileobj, [location, '/dataTimeSeries'], obj.dataTimeSeries, 'array');
-            hdf5write_safe(fileobj, [location, '/time'], obj.time, 'array');
+            hdf5write_safe(fid, [location, '/dataTimeSeries'], obj.dataTimeSeries, 'array');
+            hdf5write_safe(fid, [location, '/time'], obj.time, 'array');
             
             for ii = 1:length(obj.measurementList)
                 obj.measurementList(ii).SaveHdf5(fid, [location, '/measurementList', num2str(ii)]);
