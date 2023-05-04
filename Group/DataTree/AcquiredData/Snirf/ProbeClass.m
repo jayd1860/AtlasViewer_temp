@@ -339,6 +339,7 @@ classdef ProbeClass < FileLoadSaveClass
                 location = ['/',location];
             end
             
+            % Convert file object to HDF5 file descriptor
             fid = HDF5_GetFileDescriptor(fileobj);
             if fid < 0
                 err = -1;

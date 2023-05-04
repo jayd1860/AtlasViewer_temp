@@ -716,6 +716,7 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
                 delete(fileobj);
             end
             
+            % Convert file object to HDF5 file descriptor
             obj.fid = HDF5_GetFileDescriptor(fileobj);
             if obj.fid < 0
                 err = -1;

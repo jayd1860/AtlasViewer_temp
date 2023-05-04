@@ -206,11 +206,6 @@ classdef DataClass < FileLoadSaveClass
                 fileobj = obj.GetFilename();
             end
             
-            if isempty(fileobj)
-               err = -1;
-               return;
-            end
-            
             try
                 % Open group
                 [gid, fid] = HDF5_GroupOpen(fileobj, location);
@@ -238,6 +233,12 @@ classdef DataClass < FileLoadSaveClass
                 location = '/nirs/data1';
             elseif location(1)~='/'
                 location = ['/',location];
+            end
+            
+            fid = HDF5_GetFileDescriptor(fileobj);
+            if fid < 0
+                err = -1;
+                return;
             end
             
             hdf5write_safe(fid, [location, '/dataTimeSeries'], obj.dataTimeSeries, 'array');
@@ -1088,7 +1089,11 @@ classdef DataClass < FileLoadSaveClass
                 return;
             end
             if ~all(obj.dataTimeSeries(:)==obj2.dataTimeSeries(:))
-                return;
+                obj.dataTimeSeries( isnan(obj.dataTimeSeries(:)) | isinf(obj.dataTimeSeries(:)) ) = 0;
+                obj2.dataTimeSeries( isnan(obj2.dataTimeSeries(:)) | isinf(obj2.dataTimeSeries(:)) ) = 0;
+                if ~all(obj.dataTimeSeries(:)==obj2.dataTimeSeries(:))
+                	return;
+                end
             end
             if ~all(obj.time(:)==obj2.time(:))
                 return;

@@ -1,12 +1,14 @@
-function [srcpos, detpos, ml] = genProbeFromRefpts(optpos, dt)
-srcpos = [];
-detpos = [];
+function SD = genProbeFromRefpts(refpts, dt, nW, options)
+optpos = refpts.pos;
 ml = [];
 if nargin==0
     return;
 end
 if ~exist('dt','var')
     dt = 30;
+end
+if ~exist('nW','var')
+    nW = 2;
 end
 iOptExcl = [];
 iOptSrcNext = 1;
@@ -60,17 +62,39 @@ srcpos(iSrc:end,:) = [];
 detpos(iDet+1:end,:) = [];
 ml = [ml, ones(size(ml,1),2)];
 
-[srcpos, ml] = squeezeOptodes(srcpos, ml, 1);
-[detpos, ml] = squeezeOptodes(detpos, ml, 2);
+[srcpos, ml, dummypos1] = squeezeOptodes(srcpos, ml, 1);
+[detpos, ml, dummypos2] = squeezeOptodes(detpos, ml, 2);
 
+dummypos = [dummypos1; dummypos2];
+
+% Create multiple wavelength meas list
+ml2 = ml;
+for ii = 2:nW
+    ml2(:,4) = ii;
+    ml = [ml; ml2];
+end
+
+% Create Lambda
+w0 = 650;
+Wstep = 100;
+lambda = [];
+for ii = w0 : Wstep : w0 + nW*Wstep
+    lambda = [lambda, ii];
+end
+
+% Create SD
+SD = NirsClass().InitProbe(srcpos, detpos, ml, lambda, dummypos);
+SD = generateSpringRegistration(SD);
 
 
 
 % --------------------------------------------------
-function [optpos, ml] = squeezeOptodes(optpos, ml, idx)
+function [optpos, ml, dummy] = squeezeOptodes(optpos, ml, idx)
+% Get only src/det pairs
+ml = ml((ml(:,4)==1), :);
+mlNew = ml;
 
 % Remove unused optodes
-mlNew = ml;
 d = diff(ml(:,1))';
 k = [];
 for ii = 1:length(d)
@@ -81,7 +105,42 @@ for ii = 1:length(d)
     end
 end
 k = unique([k, max(ml(:,idx))+1:size(optpos,1)]);
+dummy = optpos(k,:);
 optpos(k,:) = [];
 ml = mlNew;
 
 
+
+
+% -----------------------------------------------
+function SD = generateSprings(SD)
+optpos = [SD.SrcPos; SD.DetPos; SD.DummyPos];
+dm = distmatrix(optpos);
+dt = 50;
+sl = [];
+kk = 1;
+maxsprings = 3;
+for ii = 1:size(dm,1)
+    k = find(dm(ii,:)>0 & dm(ii,:)<dt);
+    for jj = 1:length(k)
+        if jj > maxsprings
+            break
+        end
+        sl(kk,:) = [ii, k(jj), dm(ii,k(jj))];
+        kk = kk+1;
+    end
+end
+SD.SpringList = sl;
+
+
+
+% -----------------------------------------------
+function SD = generateAnchors(SD, refpts)
+al = 
+for ii = 1:
+
+
+% -----------------------------------------------
+function SD = generateSpringRegistration(SD)
+SD = generateSprings(SD);
+SD = generateAnchorPts(SD);

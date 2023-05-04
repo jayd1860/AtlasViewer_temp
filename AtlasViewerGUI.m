@@ -5222,7 +5222,9 @@ if isempty(dt) || isempty(dt{1})
 else
     dt = str2num(dt{1});
 end
-[srcpos, detpos, ml] = genProbeFromRefpts(atlasViewer.refpts.pos, dt);
+SD = genProbeFromRefpts(atlasViewer.refpts.pos, dt);
+
+% Get file name to save in
 [fname, pname] = uiputfile({'*.SD';'*.nirs';'*.snirf'});
 pause(.2);
 if length(fname)==1 && fname==0
@@ -5230,11 +5232,6 @@ if length(fname)==1 && fname==0
 end
 fnameFull = [filesepStandard(pname), fname];
 [~, ~, ext] = fileparts(fnameFull);
-nW = length(unique(ml(:,4)));
-SD.Lambda = zeros(1,nW);
-        SD.SrcPos = srcpos;
-        SD.DetPos = detpos;
-        SD.MeasList = ml;
 switch(ext)
     case {'.nirs', '.SD'}
         n = NirsClass(SD);
