@@ -10,6 +10,9 @@ end
 if ~exist('nW','var')
     nW = 2;
 end
+if ~exist('options','var')
+    options = 'springs';
+end
 iOptExcl = [];
 iOptSrcNext = 1;
 iSrc = 1;
@@ -68,24 +71,24 @@ ml = [ml, ones(size(ml,1),2)];
 dummypos = [dummypos1; dummypos2];
 
 % Create multiple wavelength meas list
-ml2 = ml;
-for ii = 2:nW
-    ml2(:,4) = ii;
-    ml = [ml; ml2];
-end
-
-% Create Lambda
+ml0 = ml;
+ml = zeros(nW*size(ml0,1),4);
 w0 = 650;
 Wstep = 100;
-lambda = [];
-for ii = w0 : Wstep : w0 + nW*Wstep
-    lambda = [lambda, ii];
+lambda = zeros(1,nW);
+for ii = 1:nW
+    iS = (ii-1)*size(ml0,1)+1;
+    iE = iS+size(ml0,1)-1;
+    ml(iS:iE, :)  =  [ml0(:,1:3), ii+zeros(size(ml0,1),1)];
+    lambda(ii) = w0 + (ii-1)*Wstep;
 end
 
 % Create SD
 SD = NirsClass().InitProbe(srcpos, detpos, ml, lambda, dummypos);
-SD = generateSpringRegistration(SD);
-
+if optionExists('springs',options)
+	SD = generateSpringRegistration(SD, refpts);
+end
+SD = movePts(SD, [50,80,-20], [1,1,1], [-80,110,-150]);
 
 
 % --------------------------------------------------
@@ -134,13 +137,84 @@ SD.SpringList = sl;
 
 
 
+
 % -----------------------------------------------
 function SD = generateAnchors(SD, refpts)
-al = 
-for ii = 1:
+al = {};
+optpos = [SD.SrcPos; SD.DetPos; SD.DummyPos];
+r = rand(1, length(refpts.labels));
+th = 88/100;
+kk = 1;
+for ii = 1:length(refpts.labels)
+    if r(ii)>th
+        [p, i] = nearest_point(optpos, refpts.pos(ii,:));
+        if ~isempty(i)
+            al(kk,:) = {i(1), refpts.labels{ii}};
+            kk = kk+1;
+        end
+    end       
+end
+SD.AnchorList = al;
+
+
 
 
 % -----------------------------------------------
-function SD = generateSpringRegistration(SD)
+function SD = generateSpringRegistration(SD, refpts)
 SD = generateSprings(SD);
-SD = generateAnchorPts(SD);
+SD = generateAnchors(SD, refpts);
+
+
+
+
+% -----------------------------------------------
+function SD = movePts(SD, r, s, t)
+if ~exist('r','var')
+    r = [0,0,0];
+end
+if ~exist('s','var')
+    s = [1,1,1];
+end
+if ~exist('t','var')
+    t = [0,0,0];
+end
+
+alpha = deg2rad(r(1));
+beta  = deg2rad(r(2));
+theta = deg2rad(r(3));
+
+A = [ ...
+    1            0             0    0;
+    0   cos(alpha)   -sin(alpha)    0;
+    0   sin(alpha)    cos(alpha)    0;
+    0            0             0    1;
+    ];
+
+B = [ ...
+    cos(beta)    0     sin(beta)     0;
+    0            1             0     0;
+   -sin(beta)    0     cos(beta)     0;
+    0            0             0     1;
+    ];
+
+C = [ ...
+    cos(theta)   -sin(theta)   0     0;
+    sin(theta)    cos(theta)   0     0;
+    0            0             1     0;
+    0            0             0     1;
+    ];
+
+D = [ ...
+    1            0             0     t(1);
+    0            1             0     t(2);
+    0            0             1     t(3);
+    0            0             0     1;
+    ];
+
+T = D*C*B*A;
+
+SD.SrcPos = xform_apply(SD.SrcPos, T);
+SD.DetPos = xform_apply(SD.DetPos, T);
+SD.DummyPos = xform_apply(SD.DummyPos, T);
+
+

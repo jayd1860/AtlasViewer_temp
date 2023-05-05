@@ -18,7 +18,10 @@ t = 0:1/sampleRate:timeTotal;
 t(N+1:end) = [];
 
 % Generate data
-rng(uint32(100*rand));
+x = uint32(100*rand);
+rng(x);
+y = uint32(100*rand);
+rng(y);
 y = zeros(N, 1); 
 y(1) = randn; % Initialize
 fprintf('Rand = %0.4f\n', y(1));
