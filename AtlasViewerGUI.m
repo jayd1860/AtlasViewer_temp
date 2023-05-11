@@ -611,7 +611,6 @@ labelssurf  = resetLabelssurf(labelssurf);
 
 
 % --------------------------------------------------------------------
-
 function pushbuttonRegisterProbeToSurface_Callback(hObject, eventdata, handles)
 global atlasViewer
 
@@ -911,13 +910,11 @@ end
 
 % --------------------------------------------------------------------
 function hray = drawRayProjection(p1,p2,headsurf)
-
 if leftRightFlipped(headsurf)
-    axesOrd=[2 1 3];
+    axesOrd = [2 1 3];
 else
-    axesOrd=[1 2 3];
+    axesOrd = [1 2 3];
 end    
-
 hray = line([p1(axesOrd(1)),p2(axesOrd(1))],[p1(axesOrd(2)),p2(axesOrd(2))],...
             [p1(axesOrd(3)),p2(axesOrd(3))],'color','m','linewidth',2);       
 set(hray,'tag','MNI projection');
@@ -2112,6 +2109,7 @@ set(hCortexProjection,'visible','off');
 % Generate rays from optodes on head to optodes on cortex and
 % highlight the faces on the label that they pass through.
 faceVertexCData = get(pialsurf.handles.surf,'faceVertexCData');
+faceVertexAlphaData = get(pialsurf.handles.surf,'faceVertexAlphaData');
 iFaces = [];
 for ii=1:size(ptsProj,1)
     p1 = ptsProj(ii,:);
@@ -2250,9 +2248,13 @@ set(handles.checkbox_Display_MNI_Projection, 'value',0);
 
 
 % --------------------------------------------------------------------
-function checkbox_Display_MNI_Projection_Callback(hObject, ~, ~)
+function checkbox_Display_MNI_Projection_Callback(hObject, eventdata, handles)
 global atlasViewer
 
+fwmodel    = atlasViewer.fwmodel;
+headvol    = atlasViewer.headvol; 
+labelssurf = atlasViewer.labelssurf; 
+headvol    = atlasViewer.headvol; 
 headsurf   = atlasViewer.headsurf;
  
 if get(hObject,'value')==1 % if checkbox is checked
@@ -2301,6 +2303,7 @@ if get(hObject,'value')==1 % if checkbox is checked
     h2 = findobj('Marker','o');
     set(h2,'Visible','off');
     
+    headvol   = atlasViewer.headvol;
     vertices  = atlasViewer.labelssurf.mesh.vertices;
     
     % Project MNI in MC space to head surface and pial surface
@@ -2313,6 +2316,7 @@ if get(hObject,'value')==1 % if checkbox is checked
         
         p1 = coordinate_MC_headsurf;
         p2 = coordinate_MC_cortex;
+        hProjectionRays = drawRayProjection(p1,p2,headsurf);
         hold on;
         plot3(coordinate_MC_cortex(2),coordinate_MC_cortex(1),coordinate_MC_cortex(3),'bo','MarkerSize',15,'MarkerFaceColor','b');
         hold off;
@@ -2481,7 +2485,7 @@ uipanelBrainDisplay_Callback(pialsurf.handles.radiobuttonShowPial, [], handles);
 
 
 % --------------------------------------------------------------------
-function popupmenuImageDisplay_CreateFcn(hObject, ~, ~)
+function popupmenuImageDisplay_CreateFcn(hObject, eventdata, handles)
 global popupmenuorder;
 
 popupmenuorder = struct(...
@@ -2708,7 +2712,7 @@ atlasViewer.fwmodel = fwmodel;
 
 
 % --------------------------------------------------------------------
-function pushbuttonCalcMetrics_new_Callback(~, ~, handles)
+function pushbuttonCalcMetrics_new_Callback(hObject, eventdata, handles)
 global atlasViewer
 
 imgrecon     = atlasViewer.imgrecon;
@@ -2736,7 +2740,8 @@ atlasViewer.imgrecon = imgrecon;
 
 
 % --------------------------------------------------------------------
-function menuItemImageReconGUI_Callback(~, ~, ~)
+function menuItemImageReconGUI_Callback(hObject, eventdata, handles)
+global atlasViewer
 ImageRecon();
 
 
@@ -2876,7 +2881,7 @@ atlasViewer.probe = probe;
 
 
 % --------------------------------------------------------------------
-function closeProjectionTbl(~, ~)
+function closeProjectionTbl(hObject, eventdata)
 global atlasViewer
 
 probe = atlasViewer.probe;
@@ -2898,7 +2903,7 @@ AtlasViewerGUI(dirnameSubj, dirnameAtlas, 'userargs');
 
 
 % --------------------------------------------------------------------
-function editViewAnglesAzimuth_Callback(hObject, ~, handles)
+function editViewAnglesAzimuth_Callback(hObject, eventdata, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -2932,7 +2937,7 @@ updateViewAngles(ii, az, el);
 
 
 % --------------------------------------------------------------------
-function editViewAnglesElevation_Callback(hObject, ~, handles)
+function editViewAnglesElevation_Callback(hObject, eventdata, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -2966,7 +2971,7 @@ updateViewAngles(ii, az, el);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsAnterior_Callback(hObject, ~, handles)
+function pushbuttonStandardViewsAnterior_Callback(hObject, eventdata, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -2999,7 +3004,7 @@ updateViewAngles(ii, 180, 0);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsPosterior_Callback(hObject, ~, handles)
+function pushbuttonStandardViewsPosterior_Callback(hObject, eventdata, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -3033,7 +3038,7 @@ updateViewAngles(ii, 0, 0);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsRight_Callback(hObject, ~, handles)
+function pushbuttonStandardViewsRight_Callback(hObject, eventdata, handles)
 
 global atlasViewer
 
@@ -3069,7 +3074,7 @@ updateViewAngles(ii, 90, 0);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsLeft_Callback(hObject, ~, handles)
+function pushbuttonStandardViewsLeft_Callback(hObject, eventdata, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -3104,7 +3109,7 @@ updateViewAngles(ii, -90, 0);
 
 
 % --------------------------------------------------------------------
-function pushbuttonStandardViewsSuperior_Callback(hObject, ~, handles)
+function pushbuttonStandardViewsSuperior_Callback(hObject, eventdata, handles)
 global atlasViewer
 
 axesv = atlasViewer.axesv;
@@ -3206,7 +3211,7 @@ RefptsSystemConfigGUI();
 
 
 % --------------------------------------------------------------------
-function radiobuttonHeadDimensions_Callback(hObject, ~, ~)
+function radiobuttonHeadDimensions_Callback(hObject, eventdata, handles)
 
 global atlasViewer
 
@@ -3418,6 +3423,12 @@ atlasViewer.fwmodel      = fwmodel;
 atlasViewer.imgrecon     = imgrecon;
 
 
+% --------------------------------------------------------------------
+% function menuItemProbeEdit_Callback(~, ~, ~)
+% global atlasViewer
+% SD = convertProbe2SD(atlasViewer.probe);
+% SDgui(SD);
+
 
 % --------------------------------------------------------------------
 function menuItemRefptsFontSize_Callback(~, ~, ~)
@@ -3524,9 +3535,6 @@ end
 
 headSurf = atlasViewer.headsurf.handles.surf;
 set(handles.uipanelProbeDesignEdit,'Units','normalized','Position',[0.7113 0.033 0.227 0.265])
-% set(handles.uipanelProbeDesignEdit,'Units','normalized','Position',[0.7113 0.033 0.4 0.265])
-% set(handles.uibuttongroupEditOptode,'Units','normalized','Position',[0.05 0.5 0.7 0.4])
-% set(handles.uipaneSpringListDist,'Units','normalized','Position',[0.05 0.05 0.7 0.4])
 if strcmpi(get(handles.uipanelProbeDesignEdit,'Visible'),'On')
     set(handles.uipanelProbeDesignEdit,'Visible','Off')
     set(handles.menuItemProbeDesignEditAV,'Checked','Off')
@@ -3665,11 +3673,6 @@ set(handles.popupmenuSelectOptodeType,'Enable','off');
 set(handles.popupmenu_selectGrommetType,'Enable','off');
 set(handles.edit_assignAnchorPt,'Enable','off');
 set(handles.edit_grommetRotation,'Enable','off');
-% set(handles.uipanel_EditOptode,'Visible','On')
-% set(handles.uipanel_EditOptode,'Units','normalized','Position',[0.77 0.45 0.2 0.465])
-% set(handles.uitable_editMLorSL,'Data',cell(5,3))
-% set(handles.uitable_editMLorSL,'ColumnName',{'Source','Detector','Distance'})
-% set(handles.uitable_editMLorSL,'Units','normalized','Position',[0.1 0.1 0.88 0.55])
 
 
 
@@ -3693,19 +3696,10 @@ if get(handles.radiobuttonEditOptodeAV,'Value') && isfield(atlasViewer.probe,'ed
     idx = atlasViewer.probe.editOptodeInfo.currentOptode;
     if idx <= nrsc
         opt_type = 'Source';
-%         opt_no = idx;
-%         grommet_type = atlasViewer.probe.SrcGrommetType{opt_no};
-%         grommet_rot = atlasViewer.probe.SrcGrommetRot{opt_no};
     elseif idx <= nrsc+ndet
         opt_type = 'Detector';
-%         opt_no = idx-nrsc;
-%         grommet_type = atlasViewer.probe.DetGrommetType{opt_no};
-%         grommet_rot = atlasViewer.probe.DetGrommetRot{opt_no};
     else
         opt_type = 'Dummy';
-%         opt_no = idx-nrsc;
-%         grommet_type = atlasViewer.probe.DummyGrommetType{idx-nrsc-ndet};
-%         grommet_rot = atlasViewer.probe.DummyGrommetRot{idx-nrsc-ndet};
     end
     
     if strcmp(selected_optode_type, opt_type)
@@ -3815,7 +3809,7 @@ for u = 1:size(al,1)
     end
 end
 atlasViewer.probe.registration.al = al;
-atlasViewer.probe.optpos_reg = optpos_reg ;
+AssignRegisteredPoints(optpos_reg);
 atlasViewer.probe.ml = ml;
 atlasViewer.probe.registration.sl = sl;
 
@@ -3824,6 +3818,7 @@ atlasViewer.probe.registration.sl = sl;
 % --------------------------------------------------------------------
 function addAnOptode(selected_point, handles)
 global atlasViewer
+
 contents = cellstr(get(handles.popupmenuSelectOptodeType,'String'));
 selected_optode_type = contents{get(handles.popupmenuSelectOptodeType,'Value')};
 contents = cellstr(get(handles.popupmenu_selectGrommetType,'String'));
@@ -3839,13 +3834,11 @@ if strcmpi(selected_optode_type,'Source')
     optpos_reg = [optpos_reg(1:nrsc,:); selected_point; optpos_reg(nrsc+1:end,:)];
     atlasViewer.probe.SrcGrommetType{end+1} = selected_grommet_type;
     atlasViewer.probe.SrcGrommetRot{end+1} = grommet_rot;
-    atlasViewer.probe.optpos_reg = optpos_reg;
+    AssignRegisteredPoints(optpos_reg);
     atlasViewer.probe.srcpos = [atlasViewer.probe.srcpos; [0 0 0]];
     nrsc = nrsc+1;
     atlasViewer.probe.nsrc = nrsc;
     atlasViewer.probe.noptorig = atlasViewer.probe.noptorig+1;
-%             atlasViewer.probe.SrcGrommetType{end+1} = '';
-%             atlasViewer.probe.SrcGrommetRot{end+1} = 0;
 
     % add measurement list to new optode
     det_dist = sqrt(sum((optpos_reg(nrsc+1:nrsc+ndet,:)-selected_point).^2,2));
@@ -3883,16 +3876,13 @@ if strcmpi(selected_optode_type,'Source')
         end
     end
     atlasViewer.probe.registration.al = al;
-%             probe = viewProbe(atlasViewer.probe, 'registered');
-%             probe = setProbeDisplay(probe, atlasViewer.headsurf);
     probe = displayProbe(atlasViewer.probe, atlasViewer.headsurf);
-%             probe.handles.labels = [probe.handles.labels(1:nrsc,:); probe.handles.labels(end,:); probe.handles.labels(nrsc+1:end-1,:)];
     atlasViewer.probe = probe;
 elseif strcmpi(selected_optode_type,'Detector')
     optpos_reg = [optpos_reg(1:nrsc+ndet,:); selected_point; optpos_reg(nrsc+ndet+1:end,:)];
     atlasViewer.probe.DetGrommetType{end+1} = selected_grommet_type;
     atlasViewer.probe.DetGrommetRot{end+1} = grommet_rot;
-    atlasViewer.probe.optpos_reg = optpos_reg;
+    AssignRegisteredPoints(optpos_reg);
     atlasViewer.probe.detpos = [atlasViewer.probe.detpos; [0 0 0]];
     ndet = ndet+1;
     atlasViewer.probe.ndet = ndet;
@@ -3939,7 +3929,7 @@ elseif strcmpi(selected_optode_type,'Detector')
     atlasViewer.probe = probe;
 
 elseif strcmpi(selected_optode_type,'Dummy')
-    atlasViewer.probe.optpos_reg = [atlasViewer.probe.optpos_reg; selected_point];
+    AssignRegisteredPoints([atlasViewer.probe.optpos_reg; selected_point]);
     atlasViewer.probe.registration.dummypos = [atlasViewer.probe.registration.dummypos; [0 0 0]];
     atlasViewer.probe.DummyGrommetType{end+1} = selected_grommet_type;
     atlasViewer.probe.DummyGrommetRot{end+1} = grommet_rot;
@@ -4052,24 +4042,11 @@ end
 
 
 % --------------------------------------------------------------------
-function editMeasurementListDist_CreateFcn(hObject, ~, ~)
-if ispc && isequal(get(hObject,'BackgroundColor'), get(0,'defaultUicontrolBackgroundColor'))
-    set(hObject,'BackgroundColor','white');
-end
-
-
-
-% --------------------------------------------------------------------
 function headsurf_btndwn(hObject, eventdata, handles)
 global atlasViewer
 if eventdata.Button == 1
     if strcmpi(get(handles.menuItemProbeDesignEditAV,'Checked'),'on')
-        selected_point = eventdata.IntersectionPoint;
-        if leftRightFlipped(atlasViewer.probe)
-                temp_pt = selected_point(2);
-                selected_point(2) = selected_point(1);
-                selected_point(1) = temp_pt;
-        end
+        selected_point = GetSelectedPoint(eventdata);
         if get(handles.radiobuttonAddOptodeAV,'Value')
             contents = cellstr(get(handles.popupmenuSelectOptodeType,'String'));
             selected_optode_type = contents{get(handles.popupmenuSelectOptodeType,'Value')};
@@ -4086,13 +4063,11 @@ if eventdata.Button == 1
                 optpos_reg = [optpos_reg(1:nrsc,:); selected_point; optpos_reg(nrsc+1:end,:)];
                 atlasViewer.probe.SrcGrommetType{end+1} = selected_grommet_type;
                 atlasViewer.probe.SrcGrommetRot{end+1} = grommet_rot;
-                atlasViewer.probe.optpos_reg = optpos_reg;
+                AssignRegisteredPoints(optpos_reg);
                 atlasViewer.probe.srcpos = [atlasViewer.probe.srcpos; [0 0 0]];
                 nrsc = nrsc+1;
                 atlasViewer.probe.nsrc = nrsc;
                 atlasViewer.probe.noptorig = atlasViewer.probe.noptorig+1;
-    %             atlasViewer.probe.SrcGrommetType{end+1} = '';
-    %             atlasViewer.probe.SrcGrommetRot{end+1} = 0;
 
                 % add measurement list to new optode
                 det_dist = sqrt(sum((optpos_reg(nrsc+1:nrsc+ndet,:)-selected_point).^2,2));
@@ -4130,16 +4105,13 @@ if eventdata.Button == 1
                     end
                 end
                 atlasViewer.probe.registration.al = al;
-    %             probe = viewProbe(atlasViewer.probe, 'registered');
-    %             probe = setProbeDisplay(probe, atlasViewer.headsurf);
                 probe = displayProbe(atlasViewer.probe, atlasViewer.headsurf);
-    %             probe.handles.labels = [probe.handles.labels(1:nrsc,:); probe.handles.labels(end,:); probe.handles.labels(nrsc+1:end-1,:)];
                 atlasViewer.probe = probe;
             elseif strcmpi(selected_optode_type,'Detector')
                 optpos_reg = [optpos_reg(1:nrsc+ndet,:); selected_point; optpos_reg(nrsc+ndet+1:end,:)];
                 atlasViewer.probe.DetGrommetType{end+1} = selected_grommet_type;
                 atlasViewer.probe.DetGrommetRot{end+1} = grommet_rot;
-                atlasViewer.probe.optpos_reg = optpos_reg;
+                AssignRegisteredPoints(optpos_reg);
                 atlasViewer.probe.detpos = [atlasViewer.probe.detpos; [0 0 0]];
                 ndet = ndet+1;
                 atlasViewer.probe.ndet = ndet;
@@ -4186,7 +4158,7 @@ if eventdata.Button == 1
                 atlasViewer.probe = probe;
 
             elseif strcmpi(selected_optode_type,'Dummy')
-                atlasViewer.probe.optpos_reg = [atlasViewer.probe.optpos_reg; selected_point];
+                AssignRegisteredPoints([atlasViewer.probe.optpos_reg; selected_point]);
                 atlasViewer.probe.registration.dummypos = [atlasViewer.probe.registration.dummypos; [0 0 0]];
                 atlasViewer.probe.DummyGrommetType{end+1} = selected_grommet_type;
                 atlasViewer.probe.DummyGrommetRot{end+1} = grommet_rot;
@@ -4194,7 +4166,7 @@ if eventdata.Button == 1
                 atlasViewer.probe.noptorig = atlasViewer.probe.noptorig+1;
 
                 % add spring list to new probe
-                opt_dist = sqrt(sum((optpos_reg-selected_point).^2,2));
+                opt_dist = sqrt(sum((atlasViewer.probe.optpos_reg-selected_point).^2,2));
                 nearby_opt = find(opt_dist >= sprint_dist(1) & opt_dist <= sprint_dist(2));
                 springList = [ones(size(nearby_opt))*(opt_pos) nearby_opt opt_dist(nearby_opt)];
                 atlasViewer.probe.registration.sl = [atlasViewer.probe.registration.sl; springList];
@@ -4210,12 +4182,7 @@ if eventdata.Button == 1
             if isempty(optpos_reg)
                 return
             end
-            selected_point = eventdata.IntersectionPoint;
-            if leftRightFlipped(atlasViewer.probe)
-                temp_pt = selected_point(2);
-                selected_point(2) = selected_point(1);
-                selected_point(1) = temp_pt;
-            end 
+            selected_point = GetSelectedPoint(eventdata);
             ml = atlasViewer.probe.ml;
             sl = atlasViewer.probe.registration.sl;
             opt_dist = sqrt(sum((optpos_reg-selected_point).^2,2));
@@ -4295,7 +4262,7 @@ if eventdata.Button == 1
                         end
                     end
                     atlasViewer.probe.registration.al = al;
-                    atlasViewer.probe.optpos_reg = optpos_reg ;
+                    AssignRegisteredPoints(optpos_reg);
                     atlasViewer.probe.ml = ml;
                     atlasViewer.probe.registration.sl = sl;
                     probe = displayProbe(atlasViewer.probe, atlasViewer.headsurf);
@@ -4311,16 +4278,8 @@ if eventdata.Button == 1
             if isempty(optpos_reg)
                 return
             end
-            selected_point = eventdata.IntersectionPoint;
-            if leftRightFlipped(atlasViewer.probe)
-                temp_pt = selected_point(2);
-                selected_point(2) = selected_point(1);
-                selected_point(1) = temp_pt;
-            end
-%             ml = atlasViewer.probe.ml;
+            selected_point = GetSelectedPoint(eventdata);
             al = atlasViewer.probe.registration.al;
-%             [ml,ia,ic] = unique(ml(:,1:2),'rows');
-%             sl = atlasViewer.probe.registration.sl;
             nrsc = atlasViewer.probe.nsrc;
             ndet = atlasViewer.probe.ndet;
             opt_dist = sqrt(sum((optpos_reg-selected_point).^2,2));
@@ -4338,8 +4297,6 @@ if eventdata.Button == 1
                 set(handles.popupmenu_selectGrommetType,'Enable','on');
                 set(handles.edit_assignAnchorPt,'Enable','on');
                 set(handles.edit_grommetRotation,'Enable','on');
-%                 nrsc = atlasViewer.probe.nsrc;
-%                 ndet = atlasViewer.probe.ndet;
                 if idx <= nrsc
                     opt_type = 'Source';
                     opt_no = idx;
@@ -4393,7 +4350,7 @@ if eventdata.Button == 1
                 if get(handles.radiobutton_MeasListVisible,'Value')
                     ml = atlasViewer.probe.ml;
                     if ~isempty(ml)
-                        [ml,ia,ic] = unique(ml(:,1:2),'rows');
+                        [ml,ia,~] = unique(ml(:,1:2),'rows');
                         sl = atlasViewer.probe.registration.sl;
                         if ~ get(handles.checkboxOptodeSDMode,'Value')
                             set(handles.checkboxOptodeSDMode,'Value',1.0)
@@ -4421,9 +4378,9 @@ if eventdata.Button == 1
                                     data{u,3} = 0;
                                 end
                             end
-                        else
+                        elseif ~strcmpi(opt_type,'dummy')
                             data = cell(3,3);
-                            msgbox('This optode do not have any measurement list');
+                            msgbox('This optode does not have any measurement list');
                         end
                         probe = displyMeasChannels_editOptode(atlasViewer.probe,ia(m_idx));
                         atlasViewer.probe = probe;
@@ -4475,7 +4432,6 @@ if eventdata.Button == 1
 elseif eventdata.Button == 3
     if get(handles.checkbox_optodeEditMode,'Value')
         ml = atlasViewer.probe.ml;
-    %     ml = unique(ml,'rows');
         sl = atlasViewer.probe.registration.sl;
         idx = atlasViewer.probe.editOptodeInfo.currentOptode;
         lambda = atlasViewer.probe.lambda;
@@ -4492,15 +4448,8 @@ elseif eventdata.Button == 3
             opt_no = idx-nrsc;
         end
         
-        selected_point = eventdata.IntersectionPoint;
-        if leftRightFlipped(atlasViewer.probe)
-                temp_pt = selected_point(2);
-                selected_point(2) = selected_point(1);
-                selected_point(1) = temp_pt;
-        end
+        selected_point = GetSelectedPoint(eventdata);
         optpos_reg = atlasViewer.probe.optpos_reg;
-%         ml = atlasViewer.probe.ml;
-%         sl = atlasViewer.probe.registration.sl;
         opt_dist = sqrt(sum((optpos_reg-selected_point).^2,2));
         [min_dist, target_idx] = min(opt_dist);
         if min_dist < 10
@@ -4544,6 +4493,7 @@ elseif eventdata.Button == 3
                     sl_idx1 = ismember(sl(:,1:2),[idx target_idx],'rows');
                     sl_idx2 = ismember(sl(:,1:2),[target_idx idx],'rows');
                     sl_idx = sl_idx1 | sl_idx2;
+                    
                     % add spring list for new connection
                     if sum(sl_idx) == 0
                         connection_dist = sqrt(sum((optpos_reg(idx,:)-optpos_reg(target_idx,:)).^2,2));
@@ -4734,6 +4684,7 @@ elseif get(handles.radiobutton_SpringListVisible,'Value')
 end
 
 
+
 % --------------------------------------------------------------------
 function checkbox_optodeEditMode_Callback(~, ~, ~)
 
@@ -4744,8 +4695,6 @@ function optodeEditMode_btndwn(hObject, eventdata, handles)
 global atlasViewer
 if strcmp(eventdata.Source.Type,'text')
     ml = atlasViewer.probe.ml;
-%     ml = unique(ml,'rows');
-    sl = atlasViewer.probe.registration.sl;
     idx = atlasViewer.probe.editOptodeInfo.currentOptode;
     lambda = atlasViewer.probe.lambda;
     nrsc = atlasViewer.probe.nsrc;
@@ -4804,6 +4753,7 @@ if strcmp(eventdata.Source.Type,'text')
    end
     
 end
+
 
 
 % --------------------------------------------------------------------
@@ -4945,6 +4895,7 @@ function edit_Lambda2_Callback(~, ~, ~)
 function edit_Lambda3_Callback(~, ~, ~)
 
 
+
 % --------------------------------------------------------------------
 function checkbox_displayAllOptodes_Callback(hObject, eventdata, handles)
 global atlasViewer
@@ -5054,13 +5005,16 @@ SD = convertProbe2SD(atlasViewer.probe);
 % create snirf object 
 snirf = SnirfClass();
 probe_snirf_object = ProbeClass(SD);
+% this field is required for acquired data to be BIDS
+% compatible. By updating this field here, it will be
+% propagated to BIDS meta data files if geneartae them through
+% bfNIRS website.
+probe_snirf_object.coordinateSystem = 'CapTrak';
 snirf.probe = probe_snirf_object;
 snirf.data = DataClass();
-% measurementList = MeasListClass(SD.MeasList);
 for ii=1:size(SD.MeasList,1)
     snirf.data.measurementList(end+1) = MeasListClass(SD.MeasList(ii,:));
 end
-% snirf.data(1).measurementList = measurementList;
 metaDataTags = MetaDataTagsClass();
 snirf.metaDataTags = metaDataTags;
 
@@ -5195,8 +5149,12 @@ probe = displyMeasChannels_editOptode(probe,ia(m_idx));
 atlasViewer.probe = probe;
 
 
+
+
 % --------------------------------------------------------------------
 function menuItemupdateOptodeNumbers_Callback(~, ~, ~)
+
+
 
 
 % --------------------------------------------------------------------
@@ -5208,41 +5166,30 @@ answer = inputdlg(prompt,dlgtitle,dims);
 answer
 
 
+
 % --------------------------------------------------------------------
 function menuItemUpdateDetectorNumbers_Callback(~, ~, ~)
 
 
 
 % --------------------------------------------------------------------
-function menuItemGenerateProbeFromRefpts_Callback(~, ~, ~)
+function selected_point = GetSelectedPoint(eventdata)
 global atlasViewer
-dt = inputdlg('Source/Detector distance threshold');
-if isempty(dt) || isempty(dt{1})
-    dt = 30;
+if leftRightFlipped(atlasViewer.headsurf)
+    axes_order = [2,1,3];
 else
-    dt = str2num(dt{1});
+    axes_order = [1,2,3];
 end
-SD = genProbeFromRefpts(atlasViewer.refpts.pos, dt);
+p = eventdata.IntersectionPoint;
+selected_point = [p(axes_order(1)), p(axes_order(2)), p(axes_order(3))];
 
-% Get file name to save in
-[fname, pname] = uiputfile({'*.SD';'*.nirs';'*.snirf'});
-pause(.2);
-if length(fname)==1 && fname==0
-    fname = [filesepStandard(pwd), 'probe.SD'];
-end
-fnameFull = [filesepStandard(pname), fname];
-[~, ~, ext] = fileparts(fnameFull);
-switch(ext)
-    case {'.nirs', '.SD'}
-        n = NirsClass(SD);
-        if strcmp(ext, '.nirs')
-            n.Save(fnameFull);
-        else
-            SD = n.SD;
-            save(fnameFull,'-mat','SD');
-        end
-    case '.snirf'
-        s = SnirfClass(SD);
-        s.Save(fnameFull)
-end
+
+
+
+% --------------------------------------------------------------------
+function AssignRegisteredPoints(optpos_reg)
+global atlasViewer
+atlasViewer.probe.optpos_reg = optpos_reg;
+atlasViewer.probe.orientation = atlasViewer.headsurf.orientation;
+
 

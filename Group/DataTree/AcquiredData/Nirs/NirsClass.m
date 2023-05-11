@@ -794,14 +794,45 @@ classdef NirsClass < AcqDataClass & FileLoadSaveClass
         
         
         % ---------------------------------------------------------
-        function srcpos = GetSrcPos(obj, ~)
+        function srcpos = GetSrcPos(obj, options) %#ok<*INUSD>
+            if ~exist('options','var')
+                options = '';
+            end
+            if optionExists(options,'2D')
+                if ~isempty(obj.SD.SrcPos)
             srcpos = obj.SD.SrcPos;
+                else
+                    srcpos = obj.SD.SrcPos3D;
+                end
+            else
+                if ~isempty(obj.SD.SrcPos3D)
+                    srcpos = obj.SD.SrcPos3D;
+                else
+                    srcpos = obj.SD.SrcPos;
+                end
+            end
         end
         
         
+        
         % ---------------------------------------------------------
-        function detpos = GetDetPos(obj, ~)
-            detpos = obj.SD.DetPos;
+        function detpos = GetDetPos(obj, options)
+            if ~exist('options','var')
+                options = '';
+            end
+            if optionExists(options,'2D')
+                if ~isempty(obj.SD.DetPos)
+                    detpos = obj.SD.DetPos;
+                else
+                    detpos = obj.SD.DetPos3D;
+                end
+            else
+                if ~isempty(obj.SD.DetPos3D)
+                    detpos = obj.SD.DetPos3D;
+                else
+                    detpos = obj.SD.DetPos;
+                end
+            end
         end
         
         

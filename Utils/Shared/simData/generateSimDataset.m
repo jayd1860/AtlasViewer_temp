@@ -1,5 +1,11 @@
-function nirs = generateSimDataset(dirname, nSubj, nSess, nRuns)
+function nirs = generateSimDataset(dirname, nSubj, nSess, nRuns, options)
+
+% 
+
 nirs = [];
+
+t0 = tic;
+
 
 if ~exist('dirname','var')
     dirname = filesepStandard(pwd);
@@ -13,6 +19,9 @@ end
 if ~exist('nRuns','var')
     nRuns = 3;
 end
+if ~exist('options','var')
+    options = 'probe:springs';
+end
 
 % Create template data
 setNamespace('AtlasViewerGUI');
@@ -22,7 +31,7 @@ if ~ispathvalid(dirnameAtlas)
 end
 refpts = initRefpts();
 refpts = getRefpts(refpts, dirnameAtlas);
-SD = genProbeFromRefpts(refpts, 36);
+SD = genProbeFromRefpts(refpts, 36, 2, options);
 nirs = NirsClass(SD);
 
 % Generate stims
@@ -50,7 +59,7 @@ for iSubj = 1:nSubj
 
     for iRun = 1:nRuns
         for iM = 1:size(nirs.SD.MeasList,1)
-            [nirs.t, nirs.d(:,iM)] = simulateDataTimeSeries(ntpts);
+            [nirs.t, nirs.d(:,iM)] = simulateDataTimeSeries(ntpts, 1, .4, t0);
         end
         snirf = SnirfClass(nirs.d, nirs.t, nirs.SD, [], nirs.s, nirs.CondNames);
         if iRun<10

@@ -21,6 +21,12 @@ end
 
 dirname = [dirname0, 'anatomical/'];
 
+if exist([dirname, 'refpts.mat'],'file')
+
+    load([dirname, 'refpts.mat'],'-mat');
+    
+else
+
     if ~isempty(refpts.pos)
         return;
     end
@@ -93,6 +99,7 @@ dirname = [dirname0, 'anatomical/'];
     [nz, iz, rpa, lpa, cz] = getLandmarks(refpts);
     [refpts.orientation, refpts.center] = getOrientation(nz, iz, rpa, lpa, cz);
       
+end
 refpts.pathname = dirname0;
 
 

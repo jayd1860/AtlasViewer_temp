@@ -715,7 +715,7 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             if exist(fileobj, 'file')
                 delete(fileobj);
             end
-            
+
             % Convert file object to HDF5 file descriptor
             obj.fid = HDF5_GetFileDescriptor(fileobj);
             if obj.fid < 0
@@ -1339,22 +1339,20 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
         
         
         % ---------------------------------------------------------
-        function srcpos = GetSrcPos(obj,option)
-            if exist('option','var')
-                srcpos = obj.probe.GetSrcPos(option);
-            else
-                srcpos = obj.probe.GetSrcPos();
+        function srcpos = GetSrcPos(obj, options)
+            if exist(options,'var')
+                options = '';
             end
+            srcpos = obj.probe.GetSrcPos(options);
         end
         
         
         % ---------------------------------------------------------
-        function detpos = GetDetPos(obj,option)
-            if exist('option','var')
-                detpos = obj.probe.GetDetPos(option);
-            else
-                detpos = obj.probe.GetDetPos();
+        function detpos = GetDetPos(obj, options)
+            if exist(options,'var')
+                options = '';
             end
+            detpos = obj.probe.GetDetPos(options);
         end
         
         

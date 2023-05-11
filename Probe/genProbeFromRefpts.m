@@ -59,11 +59,24 @@ while 1
 
     iSrc = iSrc+1;
     iDet = iDet+length(idxsNew);
-
 end
 srcpos(iSrc:end,:) = [];
 detpos(iDet+1:end,:) = [];
-ml = [ml, ones(size(ml,1),2)];
+
+
+% Create a more complete set of channels between detectors and sources
+for ii = 1:size(detpos)
+    for jj = 1:size(srcpos)
+        if dist3(detpos(ii,:), srcpos(jj,:)) < dt
+            k = find(ml(:,1)==jj & ml(:,2)==ii);
+            if isempty(k)
+                ml = [ml; [jj, ii]];
+            end
+        end
+    end
+end
+ml = sortrows(ml);
+ml = [ml, zeros(size(ml,1),1), ones(size(ml,1),1)];
 
 [srcpos, ml, dummypos1] = squeezeOptodes(srcpos, ml, 1);
 [detpos, ml, dummypos2] = squeezeOptodes(detpos, ml, 2);
@@ -85,10 +98,18 @@ end
 
 % Create SD
 SD = NirsClass().InitProbe(srcpos, detpos, ml, lambda, dummypos);
-if optionExists('springs',options)
+if optionExists(options, 'springs')
 	SD = generateSpringRegistration(SD, refpts);
 end
 SD = movePts(SD, [50,80,-20], [1,1,1], [-80,110,-150]);
+
+if optionExists(options, 'probe')
+    profileFilename = [filesepStandard(pwd), 'probe.SD'];
+    fprintf('Saving %s with ', profileFilename)
+    save(profileFilename, '-mat', 'SD');
+end
+
+
 
 
 % --------------------------------------------------
