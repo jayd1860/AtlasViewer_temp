@@ -1,4 +1,4 @@
-classdef SnirfClass < AcqDataClass & FileLoadSaveClass
+\classdef SnirfClass < AcqDataClass & FileLoadSaveClass
     
     properties
         formatVersion
@@ -271,16 +271,6 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             
             % Initialize non-SNIRF variables
             obj.stim0          = StimClass().empty();            
-            obj.errmsgs = {
-                'MATLAB could not load the file.'
-                '''formatVersion'' is invalid.'
-                '''metaDataTags'' field is invalid.'
-                '''data'' field is invalid.'
-                '''stim'' field has corrupt data. Some or all stims could not be loaded'
-                '''probe'' field is invalid.'
-                '''aux'' field is invalid and could not be loaded'
-                'WARNING: ''data'' field corrupt and unusable'
-                };
         end
         
                
@@ -316,11 +306,7 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
         
         
         % -------------------------------------------------------
-        function objnew = CopyMutable(obj, options)
-            if nargin==1
-                options = '';
-            end
-            
+        function objnew = CopyMutable(obj, ~)
             % Load mutable data from Snirf file here ONLY if data storage scheme is 'files'
             if strcmpi(obj.GetDataStorageScheme(), 'files')
                 obj.LoadStim(obj.GetFilename());
@@ -381,9 +367,14 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             end
             err = -1;
         end
+    end
         
         
         
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %  Load methods for SNIRF fields
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    methods
         
         % -------------------------------------------------------
         function err = LoadFormatVersion(obj)
@@ -525,7 +516,7 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             
             % This is a required field. If it's empty means the whole snirf object is bad
             if isempty(obj.probe)
-                err = -1;
+                err = obj.SetError();
             end
         end
         
@@ -567,7 +558,8 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
                 fileobj = obj.GetFilename();
             end
             if isempty(fileobj)
-                err = -1;
+                obj.SetError(-1, errmsgs)
+                err = obj.GetError();     % preserve error state if exiting early
                 return;
             end
             
@@ -655,7 +647,13 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             end
             
         end
+    end
+    
         
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %  Save methods for SNIRF fields
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    methods
         
         % -------------------------------------------------------
         function SaveMetaDataTags(obj, fileobj)
@@ -763,7 +761,52 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             H5F.close(obj.fid);
         end
         
+    end
+    
+    
+    
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %  Error validation methods
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    methods
         
+        % -------------------------------------------------------
+        function [errmsgs, err] = GetError(obj)
+            errmsgs = {};
+            err = [];
+            if isempty(obj)
+                return;
+            end
+            errmsgs = obj.probe.GetError();
+            if ~isempty(errmsgs)
+                obj.SetError(-2, errmsgs)
+            end            
+            errmsgs = obj.data.GetError();
+            if ~isempty(errmsgs)
+                obj.SetError(-3, errmsgs)
+            end
+            errmsgs = obj.stim.GetError();
+            if ~isempty(errmsgs)
+                obj.SetError(-4, errmsgs)
+            end
+            errmsgs = obj.aux.GetError();
+            if ~isempty(errmsgs)
+                obj.SetError(-5, errmsgs)
+            end
+            errmsgs = obj.metaDataTags.GetError();
+            if ~isempty(errmsgs)
+                obj.SetError(-6, errmsgs)
+            end
+            errmsgs = 
+        end
+        
+    end
+    
+        
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %  Misc stim related methods
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    methods
         
         % -------------------------------------------------------
         function [stimFromFile, changes] = UpdateStim(obj, fileobj)
@@ -855,8 +898,14 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             obj.UpdateStim(fileobj);
         end
         
+    end
         
         
+        
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    %  Equality methods for comparing to other SnirfClass objects
+    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+    methods
         
         % -------------------------------------------------------
         function B = eq(obj, obj2)
@@ -982,7 +1031,6 @@ classdef SnirfClass < AcqDataClass & FileLoadSaveClass
             end
             b = true;
         end
-        
         
     end
     

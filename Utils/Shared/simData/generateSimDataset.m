@@ -58,7 +58,11 @@ function out = generateSimDataset(dirname, nSubj, nSess, nRuns, options)
 %
 %
 global atlasViewer
+global probeFilename
+
 atlasViewer = [];
+probeFilename = 'newfile1.SD';
+
 out = [];
 
 t0 = tic;
@@ -108,12 +112,16 @@ if optionExists(options, 'data')
     subjDirs = dir('sub-*');
     for ii = 1:length(subjDirs)
         digptsNew = movePts(digpts, randNearZero(1,3,t0), randNearOne(1,3,t0), randNearZero(1,3,t0));
-        digptsNew.pathname = [filesepStandard(pwd), subjDirs(ii).name];
+        digptsNew.pathname = [filesepStandard(dirname), subjDirs(ii).name];
         saveDigpts(digptsNew);
+        if ispathvalid([dirname, probeFilename])
+            if optionExists(options, 'springs')
+                copyfile([dirname, probeFilename], [filesepStandard(dirname), subjDirs(ii).name, '/', probeFilename]);
+            end
+        end
     end
     delete('./digpts*.txt');
 end
-
 
 
 

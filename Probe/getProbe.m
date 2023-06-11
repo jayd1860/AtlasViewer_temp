@@ -113,6 +113,7 @@ probe = checkMeasList(probe);
 
 % -------------------------------------------
 function probe = loadFromSDFiles(dirname, varargin)
+probe = initProbe();
 
 % Arg 2: Extract all the probes from varargin agianst which the SD probes have to
 % be compared for compatability
@@ -125,20 +126,35 @@ end
 
 % Check if multiple SD files are available. If more than one probe is
 % availale then ask user to which one to import otherwise import the probe
-files = dir('./*.SD');
-probe = initProbe();
+files1 = dir('./*.SD');
+files2 = dir('./*.snirf');
+files = [files1; files2];
 if length(files) == 1
+    [~, ~, ext] = fileparts(files(1).name);
+    if strcmpi(ext, '.SD')
     filedata = load([dirname, files(1).name], '-mat');
     probe = loadSD(probe, filedata.SD);
     probe.filename_to_save = files(1).name(1:end-3);
+    elseif strcmpi(ext, '.snirf')
+        s = SnirfClass([dirname, files(1).name]);
+        n = NirsClass(s);
+        probe = convertSD2probe(n.SD);
+    end
 elseif length(files) > 1
-    [filename, pathname] = uigetfile('*.SD','Please select the SD file you want to load');
+    [filename, pathname] = uigetfile({'*.SD; *.snirf'},'Please select the probe file you want to load');
     if filename==0
         return;
     end
+    [~, ~, ext] = fileparts(filename);
+    if strcmpi(ext, '.SD')
     filedata = load([pathname filename], '-mat');
     probe = loadSD(probe, filedata.SD);
     probe.filename_to_save = filename(1:end-3);
+    elseif strcmpi(ext, '.snirf')
+        s = SnirfClass([dirname, filename]);
+        n = NirsClass(s);
+        probe = convertSD2probe(n.SD);
+    end
 end
 
 

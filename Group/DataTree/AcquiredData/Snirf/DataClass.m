@@ -178,7 +178,6 @@ classdef DataClass < FileLoadSaveClass
             end
             
             err = ErrorCheck(obj, err);
-            obj.SetError(err); 
         end
         
         
@@ -1067,7 +1066,6 @@ classdef DataClass < FileLoadSaveClass
                 obj = DataClass();
             end
             if isempty(obj2)
-                obj = DataClass();
                 return;
             end
             if ~isa(obj2, 'DataClass')
@@ -1086,7 +1084,6 @@ classdef DataClass < FileLoadSaveClass
                 obj = DataClass();
             end
             if isempty(obj2)
-                obj = DataClass();
                 return;
             end
             if ~isa(obj2, 'DataClass')
