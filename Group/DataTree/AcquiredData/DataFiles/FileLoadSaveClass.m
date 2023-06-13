@@ -143,11 +143,17 @@ classdef FileLoadSaveClass < matlab.mixin.Copyable
         
         
         % -------------------------------------------------------
-        function SetError(obj, err, errmsg)
+        function err = SetError(obj, err0, errmsg)
+            err = 0;
             if ~exist('errmsg','var')
                 errmsg = '';
-       		end
-            obj.err = obj.err + 2^abs(err);
+            end
+            if (err0 <= 0) || (obj.err < 0)
+                k = -1;
+            else
+                k = 1;
+            end
+            obj.err = k * bitor(abs(obj.err), 2^abs(err0));
             if isempty(errmsg)
                 return
             end
@@ -158,13 +164,40 @@ classdef FileLoadSaveClass < matlab.mixin.Copyable
         
         % -------------------------------------------------------
         function [err, errmsgs] = GetError(obj)
-            err = [];
-            errmsgs = {};
+            err = 0;
+            errmsgs = '';
             if isempty(obj)
                 return
             end
-            err = -1 * obj.err;
+            if isempty(obj.errmsgs)
+                return
+            end
+            err = obj.err;
             errmsgs = obj.errmsgs;
+        end
+        
+        
+        % ----------------------------------------------------------------------------------
+        function errmsg = GetErrorMsg(obj)
+            errmsg = '';
+            [~, errmsgs] = obj.GetError();
+            kk = 1;
+            for ii = 1:length(errmsgs)
+                if isempty(errmsgs{ii})
+                    continue
+                end
+                if length(errmsgs)==1
+                    numStr = sprintf('  ');
+                else
+                    numStr = sprintf('%d)', kk);
+                end
+                if isempty(errmsg)
+                    errmsg = sprintf('%s %s%s;  ', numStr, errmsg, errmsgs{ii});
+                else
+                    errmsg = sprintf('%s %s %s;  ', errmsg, numStr, errmsgs{ii});
+                end
+                kk = kk+1;
+            end
         end
         
         

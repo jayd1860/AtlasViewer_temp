@@ -73,9 +73,11 @@ classdef AuxClass < FileLoadSaveClass
                 [gid, fid] = HDF5_GroupOpen(fileobj, location);
                 
                 % Absence of optional aux field raises error > 0
-                if gid.double < 0
-                    err = 1;
-                    return;
+                if isstruct(gid)
+                    if gid.double < 0 
+                        err = obj.SetError(0, sprintf('aux field %s field can''t be loaded', location));
+                        return 
+                    end
                 end
                 
                 obj.name            = HDF5_DatasetLoad(gid, 'name');
@@ -94,24 +96,24 @@ classdef AuxClass < FileLoadSaveClass
                 if iscell(obj.name) && length(obj.name) == 1
                     obj.name = obj.name{1};
                 end
-                
-                err = obj.ErrorCheck();
-                
+                                
                 % Close group
                 HDF5_GroupClose(fileobj, gid, fid);
                 
             catch
                 
-                if gid.double > 0
-                    % If optional aux field exists BUT is in some way invalid it raises error < 0
-                    err = -6;
+                if isstruct(gid)
+                    if gid.double < 0 
+                        obj.SetError(0, sprintf('aux field %s field can''t be loaded', location));
+                    end
                 else
-                    err = 1;
+                    obj.SetError(-7, sprintf('aux field %s field can''t be loaded', location));
                 end
                 
             end
             
-            obj.SetError(err); 
+            err = obj.ErrorCheck();
+            
         end
 
         
@@ -247,24 +249,19 @@ classdef AuxClass < FileLoadSaveClass
         function err = ErrorCheck(obj)
             err = 0;
             if isempty(obj.name)
-                err = -1;
-                return
+                obj.SetError(-2, sprintf('aux.name field is empty'));
             end
             if isempty(obj.dataTimeSeries)
-                err = -2;
-                return
+                obj.SetError(-3, sprintf('aux.dataTimeSeries field is empty'));
             end
             if isempty(obj.time)
-                err = -3;
-                return
+                obj.SetError(-4, sprintf('aux.time field is empty'));
             end
             if length(obj.dataTimeSeries) ~= length(obj.time)
-                err = -4;
-                return
+                obj.SetError(-5, sprintf('aux.time size does not equal aux.dataTimeSeries'));
             end
             if ~ischar(obj.name)
-                err = -5;
-                return
+                obj.SetError(-6, sprintf('aux.name field is empty'));
             end
         end
         
