@@ -133,7 +133,7 @@ end
 initAxesv(handles);
 
 cd(atlasViewer.dirnameSubj);
-checkForAtlasViewerUpdates();
+checkForUpdates('AtlasViewer');
 PrintSystemInfo([], 'AtlasViewerGUI');
 
 
@@ -187,7 +187,7 @@ if length(argExtern)>=4
     end
 end
 
-checkForAtlasViewerUpdates();
+checkForUpdates('AtlasViewer');
 
 atlasViewer.handles.figure = hObject;
 atlasViewer.handles.hHbConc = [];
