@@ -1366,13 +1366,15 @@ classdef NirsClass < AcqDataClass
         
         
         % ----------------------------------------------------------------------------------
-        function ConvertSnirfProbe(obj, snirf)
+        function err = ConvertSnirfProbe(obj, snirf)
+            err = 0;
             if isempty(snirf)
                 return
             end
             if isempty(snirf.probe)
                 return
             end
+            try
             obj.SD.Lambda = snirf.probe.wavelengths;
             obj.SD.SrcPos = snirf.probe.sourcePos2D;
             obj.SD.DetPos = snirf.probe.detectorPos2D;
@@ -1395,6 +1397,9 @@ classdef NirsClass < AcqDataClass
                 obj.SD.Landmarks.pos        = obj.SD.Landmarks2D.pos;
                 obj.SD.Landmarks.labels     = obj.SD.Landmarks2D.labels;
             end                
+            catch
+                err = -1;
+            end
         end
         
         
@@ -1432,17 +1437,23 @@ classdef NirsClass < AcqDataClass
         
         
         % ----------------------------------------------------------------------------------
-        function ConvertSnirfAux(obj, snirf)
-            obj.aux = zeros(length(obj.t), length(snirf.aux));
-            for ii = 1:length(snirf.aux)
-                obj.aux(:,ii) = snirf.aux(ii).dataTimeSeries;
+        function err = ConvertSnirfAux(obj, snirf)
+            err = 0;
+            try
+	            obj.aux = zeros(length(obj.t), length(snirf.aux));
+	            for ii = 1:length(snirf.aux)
+	                obj.aux(:,ii) = snirf.aux(ii).dataTimeSeries;
+	            end
+            catch
+                err = -1;
             end
         end
         
         
         
         % ----------------------------------------------------------------------------------
-        function ConvertSnirf(obj, snirf)
+        function err = ConvertSnirf(obj, snirf)
+            err = 0;
             obj.ConvertSnirfProbe(snirf);
             if ~isempty(snirf.data)
                 obj.d = snirf.data(1).dataTimeSeries;
