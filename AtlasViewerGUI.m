@@ -1691,19 +1691,6 @@ digpts      = atlasViewer.digpts;
 probe       = atlasViewer.probe;
 refpts      = atlasViewer.refpts;
 
-% If unregistered flat probe exists, warn user that itshould be registed
-% before generating simulated digitized optodes.
-% if isempty(probe.optpos_reg) && ~isempty(probe.al)
-%     msg{1} = sprintf('Warning: Unregistered probe exists. Generating simulated digitized points from unregistred probe');
-%     msg{2} = sprintf('will yeild incorrect results. Please register probe to head surface before generating simulated ');
-%     msg{3} = sprintf('digitized points. Do you still want to proceed?');
-%     q = MenuBox(msg, {'YES','NO'});
-%     if q==2
-%         return;
-%     end
-% end
-
-
 % Get head size measurements from input dialog
 prompt = {'Head Circumference (cm):','Iz to Nz (cm):','RPA to LPA (cm):'};
 dlg_title = 'Input Head Size';
@@ -1714,18 +1701,14 @@ answer = inputdlg(prompt,dlg_title,num_lines,def);
 if isempty(answer)
     return
 end
-digpts.headsize = setHeadsize(digpts.headsize, answer);
 
-% Calculate digitized points
-digpts = calcDigptsFromHeadsize(digpts, refpts);
-
-% If digitized points exist but are missing probe optodes, generate 
-% artificial digitize optodes 
-if ~digpts.isempty(digpts) && digpts.isemptyProbe(digpts)
-    digpts = digpts.copyProbe(digpts, probe);    
-    saveDigpts(digpts, 'overwrite');
-    probe.T_2digpts = inv(digpts.T_2vol);
+headsize = zeros(1, length(answer));
+for ii = 1:length(answer)
+    headsize(ii) = str2num(answer{ii});
 end
+save([digpts.pathname, 'headsize.txt'], '-ascii','headsize');
+digpts = initDigpts(digpts.pathname);
+digpts = getDigpts(digpts, digpts.pathname, refpts);
 
 atlasViewer.digpts = digpts;
 atlasViewer.probe = probe;
