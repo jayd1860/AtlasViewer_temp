@@ -112,9 +112,7 @@ classdef DataClass < FileLoadSaveClass
     methods
         
         % -------------------------------------------------------
-        function err = LoadHdf5(obj, fileobj, location)
-            err = 0;
-            
+        function err = LoadHdf5(obj, fileobj, location)                       
             % Arg 1
             if ~exist('fileobj','var') || (ischar(fileobj) && ~exist(fileobj,'file'))
                 fileobj = '';
@@ -162,7 +160,7 @@ classdef DataClass < FileLoadSaveClass
                         obj.measurementList(ii) = [];
                         break
                     elseif errtmp < 0
-                        err = obj.SetError(-2, 'data.measurementList ERROR');
+                        obj.SetError(-2, 'data.measurementList ERROR');
                         break
                     end
                     ii = ii+1;
@@ -175,22 +173,20 @@ classdef DataClass < FileLoadSaveClass
                 
                 if isstruct(gid)
                     if gid.double < 0
-                        err = obj.SetError(0, 'data field can''t be loaded');
-                        return
+                        obj.SetError(0, 'data field can''t be loaded');
                     end
                 end
-                err = ErrorCheck(obj, err);
                 
             end
+            
+            err = ErrorCheck(obj);
             
         end
         
         
         
         % -------------------------------------------------------
-        function err = LoadTime(obj, fileobj)
-            err = 0;
-            
+        function err = LoadTime(obj, fileobj)            
             % Arg 1
             if ~exist('fileobj','var') || (ischar(fileobj) && ~exist(fileobj,'file'))
                 fileobj = '';
@@ -213,8 +209,9 @@ classdef DataClass < FileLoadSaveClass
                 HDF5_GroupClose(fileobj, gid, fid);
             catch
                 err = -1;
+                return
             end
-            err = ErrorCheck(obj, err, {'time'});
+            err = ErrorCheck(obj, {'time'});
         end
         
         
@@ -277,12 +274,21 @@ classdef DataClass < FileLoadSaveClass
                     return;
                 end
             end
+            if all(obj.dataTimeSeries==0)
+                return
+            end
             b = true;
         end
         
         
+        % -------------------------------------------------------
+        function b = IsValid(obj)
+            b = obj.IsDataValid();
+        end
+        
+        
         % ----------------------------------------------------------------------
-        function err = ErrorCheck(obj, err, params)
+        function err = ErrorCheck(obj, params)   
             if ~exist('params','var')
                 params = propnames(obj);
             end
@@ -290,27 +296,28 @@ classdef DataClass < FileLoadSaveClass
             % Check dataTimeSeries
             if ismember('dataTimeSeries',params)
                 if obj.IsEmpty()
-                    err = obj.SetError(-2, sprintf('%s:  field is empty', [obj.location, '/dataTimeSeries']));
+                    obj.SetError(-2, sprintf('%s:  field is empty', [obj.location, '/dataTimeSeries']));
+                    err = obj.GetError();
                     return;
                 end
                 if size(obj.dataTimeSeries,1) ~= length(obj.time)
-                    err = obj.SetError(-3, sprintf('%s:  size does not equal data.time size', [obj.location, '/dataTimeSeries']));
+                    obj.SetError(-3, sprintf('%s:  size does not equal data.time size', [obj.location, '/dataTimeSeries']));
                 end
                 if size(obj.dataTimeSeries,2) ~= length(obj.measurementList)
-                    err = obj.SetError(-4, sprintf('%s:  number of columns does not equal length of data.measurementList', [obj.location, '/dataTimeSeries']));
+                    obj.SetError(-4, sprintf('%s:  number of columns does not equal length of data.measurementList', [obj.location, '/dataTimeSeries']));
                 end
                 if all(obj.dataTimeSeries==0)
-                    err = obj.SetError(5, sprintf('%s:  all values are zero', [obj.location, '/dataTimeSeries']));
+                    obj.SetError(5, sprintf('%s:  all values are zero', [obj.location, '/dataTimeSeries']));
                 end
             end
             
             % Check time
             if ismember('time',params)
                 if isempty(obj.time)
-                    err = obj.SetError(-6, sprintf('%s:  is empty', [obj.location, '/time']));
+                    obj.SetError(-6, sprintf('%s:  is empty', [obj.location, '/time']));
                 end
                 if all(obj.time==0)
-                    err = obj.SetError(-7, sprintf('%s:  all time points are zero', [obj.location, '/time']));
+                    obj.SetError(7, sprintf('%s:  all time points are zero', [obj.location, '/time']));
                 end
             end
             
@@ -322,18 +329,16 @@ classdef DataClass < FileLoadSaveClass
                 while i <= size(ml,1)
                     k = find(ml(:,1)==ml(i,1) & ml(:,2)==ml(i,2));
                     if length(k) < nDatatypes
-                        err = obj.SetError(-7, sprintf('%s:  number of datatypes (%d) for SD pair %d is less than number of data types in measurement list (%d)', ...
+                        obj.SetError(-7, sprintf('%s:  number of datatypes (%d) for SD pair %d is less than number of data types in measurement list (%d)', ...
                             [obj.location, '/measurementList'], length(k), i, nDatatypes));
                     elseif length(k) > nDatatypes
-                        err = obj.SetError(-8, sprintf('%s:  number of datatypes (%d) for SD pair %d exceeds number of data types in measurement list (%d)', ...
+                        obj.SetError(-8, sprintf('%s:  number of datatypes (%d) for SD pair %d exceeds number of data types in measurement list (%d)', ...
                             [obj.location, '/measurementList'], length(k), i, nDatatypes));
-                    end
-                    if err < 0
-                        break
                     end
                     i = i+length(k);
                 end
-            end
+            end            
+            err = obj.GetError();
         end
         
     end

@@ -423,13 +423,15 @@ classdef SnirfClass < AcqDataClass
                 end
                 
                 errtmp = obj.data(ii).LoadHdf5(fileobj, [obj.location, '/data', num2str(ii)]);
-                if errtmp < 0
+                if errtmp == -1
                     obj.data(ii).delete();
                     obj.data(ii) = [];
                     break;
-                elseif errtmp ~= 0
+                elseif errtmp < 0
                     err = -1;
                     break
+                elseif errtmp > 0
+                    err = 1;                    
                 end
                 ii = ii+1;
             end
@@ -462,9 +464,6 @@ classdef SnirfClass < AcqDataClass
                     obj.stim(ii).delete();
                     obj.stim(ii) = [];
                     break;
-                elseif errtmp ~= 0
-                    err = -1;
-                    break;                    
                 end
                 ii = ii+1;
             end
@@ -481,6 +480,7 @@ classdef SnirfClass < AcqDataClass
                     obj.stim0(ii) = [];
                     break;
                 elseif errtmp ~= 0
+                    err = -1;
                     break;                    
                 end
                 ii = ii+1;
@@ -576,7 +576,7 @@ classdef SnirfClass < AcqDataClass
                 
                 %%%% Load formatVersion
                 if obj.LoadFormatVersion() 
-                    obj.SetError(-3, 'nirs.formatVersion ERROR');
+                    obj.SetError(-3, 'ERROR - corrupt field:  ');
                 end
 
                 %%%% Load metaDataTags
@@ -584,15 +584,17 @@ classdef SnirfClass < AcqDataClass
                     % Here a positive return value means that invalid data meta tags 
                     % should NOT be a show stopper if we can help it, if the rest of the data 
                     % is valid. So just let user know they're invalid with a warning.
-                    obj.SetError(4, 'nirs.metaDataTags WARNING - corrupt field');
+                    obj.SetError(4, 'WARNING - corrupt field:  ');
                 end
 
                 %%%% Load data
                 errtmp = obj.LoadData(obj.fid);
                 if isempty(obj.data)
-                    obj.SetError(-5, 'nirs.data ERROR - missing field');
+                    obj.SetError(-5, 'ERROR - data field missing:  ');
                 elseif errtmp < 0
-                    obj.SetError(-6, 'nirs.data ERROR - corrupt field');
+                    obj.SetError(-6, 'ERROR - corrupt field:  ');
+                elseif errtmp > 0
+                    obj.SetError(6, 'WARNING - empty data field:  ');
                 end
 
                 %%%% Load stim
@@ -600,15 +602,15 @@ classdef SnirfClass < AcqDataClass
                     % Optional field: even if invalid we still want to be
                     % able to work with the rest of the data. Only log
                     % warning
-                    obj.SetError(7, 'nirs.stim WARNING - corrupt field');
+                    obj.SetError(7, 'WARNING - corrupt field:  ');
                 end
 
                 %%%% Load probe
                 errtmp = obj.LoadProbe(obj.fid);
                 if isempty(obj.probe)
-                    obj.SetError(-8, 'nirs.probe ERROR - missing field');
+                    obj.SetError(-8, 'ERROR - probe field missing:  ');
                 elseif errtmp < 0 
-                    obj.SetError(-9, 'nirs.probe ERROR - corrupt field');
+                    obj.SetError(-9, 'ERROR - corrupt field:  ');
                 end
 
                 %%%% Load aux. This is an optional field
@@ -616,22 +618,32 @@ classdef SnirfClass < AcqDataClass
                     % Optional field: even if invalid we still want to be
                     % able to work with the rest of the data. Only log
                     % warning
-                    obj.SetError(10, 'nirs.aux WARNING - corrupt field');
+                    obj.SetError(10, 'WARNING - corrupt field:  ');
                 end
                 
                 % Close group
                 HDF5_GroupClose(fileobj, obj.gid, obj.fid);
                 
-            catch
+            catch ME
                 
                 if isempty(obj.fid) || isempty(obj.gid)
-                    obj.SetError(0, 'not an HDF5 file format');
+                    obj.SetError(0, 'Not an HDF5 file format:  ');
                 elseif isempty(obj.fid) || isempty(obj.gid)
-                    obj.SetError(-11, 'unidentified error');
+                    obj.SetError(-11, 'Unidentified error:   ');
+                else
+                    rethrow(ME)
                 end
                 
             end
             
+            if isempty(obj.fid) || isempty(obj.gid)
+                err = obj.SetError(0, 'Not an HDF5 file format:   ');
+                return
+            elseif isempty(obj.fid) || isempty(obj.gid)
+                err = obj.SetError(-11, 'Unidentified error:   ');
+                return
+            end
+                
             if obj.fid.identifier > 0
                 H5F.close(obj.fid);
             end
@@ -1729,7 +1741,7 @@ classdef SnirfClass < AcqDataClass
         % ----------------------------------------------------------------------------------
         function errmsg = GetErrorMsg(obj)
             errmsg = '';
-            errmsgs = {};
+            errmsgs{1} = [obj.errmsgs{:}];
             if obj.probe.GetError() ~= 0
                 errmsgs{end+1,1} = obj.probe.GetErrorMsg();
             end
@@ -1761,6 +1773,11 @@ classdef SnirfClass < AcqDataClass
                     errmsg = sprintf('%s', errmsgs{ii});
                 else
                     errmsg = sprintf('%s%s', errmsg, errmsgs{ii});
+                end
+            end
+            if ~isempty(errmsg)
+                if errmsg(end) ~= sprintf('\n')
+                    errmsg(end+1) = sprintf('\n');
                 end
             end
         end
@@ -1879,6 +1896,19 @@ classdef SnirfClass < AcqDataClass
             end
             md2d = mean(d1);
             md3d = mean(d2);
+        end
+        
+        
+        
+        % -------------------------------------------------------
+        function b = IsDataValid(obj)
+            b = false;
+            for ii = 1:length(obj.data)
+                if ~obj.data(ii).IsValid()
+                    return
+                end
+            end
+            b = true;
         end
         
         

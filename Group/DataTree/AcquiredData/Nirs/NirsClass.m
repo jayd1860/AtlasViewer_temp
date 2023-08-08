@@ -347,10 +347,15 @@ classdef NirsClass < AcqDataClass
             end
             [~, k1] = sortrows(obj.SD.MeasList);
             [~, k2] = sortrows(obj2.SD.MeasList);
-            if ~all(obj.SD.MeasList(k1,:) == obj2.SD.MeasList(k2,:))
+            
+            % Compare meas list dimensions first - if that's not equal then the probes aren't equal
+            if ~all( size(obj.SD.MeasList(k1,:)) == size(obj2.SD.MeasList(k2,:)) )
                 return;
             end            
 
+            if ~all(obj.SD.MeasList(k1,:) == obj2.SD.MeasList(k2,:))
+                return;
+            end            
             
             for kk = 1:length(fields)
                 for jj = 1:length(fields{kk})
@@ -1387,9 +1392,9 @@ classdef NirsClass < AcqDataClass
             	obj.SD.Landmarks3D.pos      = snirf.probe.landmarkPos3D;
             end
             if length(snirf.probe.landmarkLabels) == size(snirf.probe.landmarkPos2D,1)
-            	obj.SD.Landmarks2D.labels   = snirf.probe.landmarkLabels;
+                obj.SD.Landmarks2D.labels   = snirf.probe.landmarkLabels;
                 obj.SD.Landmarks2D.pos      = snirf.probe.landmarkPos2D;
-        	end
+            end
             if     ~isempty(obj.SD.Landmarks3D.labels)
                 obj.SD.Landmarks.pos        = obj.SD.Landmarks3D.pos;
                 obj.SD.Landmarks.labels     = obj.SD.Landmarks3D.labels;

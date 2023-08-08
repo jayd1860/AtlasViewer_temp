@@ -1,4 +1,4 @@
-function checkForAtlasViewerUpdates(appname)
+function checkForUpdates(appname)
 global cfg
 
 cfg = InitConfig(cfg);
@@ -17,6 +17,9 @@ if (strcmp(cfg.GetValue('Check For Updates'),'on'))
         end
         SetLastCheckForUpdates();
         version = regexp(s, 'id="version">(.*?)<\/', 'tokens');
+        if isempty(version)
+            return
+        end
         web_vrnum = version{1}{1};
         this_vrnum = getVernum();
         promptFlag = compareVernum(web_vrnum, this_vrnum);  % If fetched vernum is greater

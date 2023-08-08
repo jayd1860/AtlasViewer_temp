@@ -11,11 +11,7 @@ switch lower(datatype)
     case {'lambda'}
         data = SD.Lambda;
     case {'srcpos'}
-        try
-            data = SD.SrcPos;
-        catch
-            d=1;
-        end
+        data = SD.SrcPos;
     case {'detpos'}
         data = SD.DetPos;
     case {'srcpos3d'}
@@ -23,7 +19,8 @@ switch lower(datatype)
     case {'detpos3d'}
         data = SD.DetPos3D;
     case {'landmarks3d'}
-        data = SD.Landmarks;        
+        data.pos = SD.Landmarks.pos(:,1:3);
+        data.labels = SD.Landmarks.labels;
 	case {'srcgrommettype'}
         if isempty(SD.SrcGrommetType)
             c = sd_data_GetGrommetChoices();

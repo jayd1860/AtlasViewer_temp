@@ -2,6 +2,7 @@ classdef FileLoadSaveClass < matlab.mixin.Copyable
     
     properties (Access = public)
         location
+        errmsgs
     end
     
     
@@ -10,7 +11,6 @@ classdef FileLoadSaveClass < matlab.mixin.Copyable
         fileformat;
         supportedFomats;
         err;
-        errmsgs
         dataStorageScheme;        
     end
     
@@ -193,7 +193,7 @@ classdef FileLoadSaveClass < matlab.mixin.Copyable
                 if isempty(errmsg)
                     errmsg = sprintf('%s\n', obj.errmsgs{ii});
                 else
-                    errmsg = sprintf('%s%s\n;  ', errmsg, obj.errmsgs{ii});
+                    errmsg = sprintf('%s%s\n', errmsg, obj.errmsgs{ii});
                 end
             end
         end

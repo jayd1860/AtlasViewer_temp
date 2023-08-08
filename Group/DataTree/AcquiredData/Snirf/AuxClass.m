@@ -257,7 +257,7 @@ classdef AuxClass < FileLoadSaveClass
                 obj.SetError(-4, sprintf('%s:  field is empty', [obj.location, '/time']));
             end
             if length(obj.dataTimeSeries) ~= length(obj.time)
-                obj.SetError(-5, sprintf('%s:  size does not equal aux.dataTimeSeries', [obj.location, '/time']));
+                obj.SetError(-5, sprintf('%s:  size does not equal size of dataTimeSeries', [obj.location, '/time']));
             end
             if ~ischar(obj.name)
                 obj.SetError(-6, sprintf('%s:  field is empty', [obj.location, '/name']));

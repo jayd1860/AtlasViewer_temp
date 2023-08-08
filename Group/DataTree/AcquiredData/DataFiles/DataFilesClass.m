@@ -462,8 +462,20 @@ classdef DataFilesClass < handle
                     continue;
                 end
                 [ps, fs] = fileparts(src.files(ii).name);
+                
+                % Search both:  files found without error  AND  files found with error
                 for jj = 1:length(obj.files)
                     [pd, fd] = fileparts(obj.files(jj).name);
+                    if strcmp(filesepStandard([ps,'/',fs], 'nameonly'), filesepStandard([pd,'/',fd], 'nameonly'))
+                        found(ii) = 1;
+                        break;
+                    end
+                end
+                if found(ii) == 1
+                    continue;
+                end
+                for jj = 1:length(obj.filesErr)
+                    [pd, fd] = fileparts(obj.filesErr(jj).name);
                     if strcmp(filesepStandard([ps,'/',fs], 'nameonly'), filesepStandard([pd,'/',fd], 'nameonly'))
                         found(ii) = 1;
                         break;
@@ -505,7 +517,13 @@ classdef DataFilesClass < handle
                     obj.LogError(msg, obj.files(ii));
                     errorIdxs = [errorIdxs, ii]; %#ok<AGROW>
                 elseif o.GetError() > 0
-                    obj.logger.Write(sprintf('DataFilesClass.ErrorCheck - "%s" WARNING:\n%s\n', obj.files(ii).name, o.GetErrorMsg()));
+                    if ~o.IsDataValid()
+                        msg = sprintf('DataFilesClass.ErrorCheck - "%s" WARNING:\n%s\n', obj.files(ii).name, o.GetErrorMsg());
+                        obj.LogError(msg, obj.files(ii));
+                        errorIdxs = [errorIdxs, ii]; %#ok<AGROW>
+                    else
+                    	obj.logger.Write(sprintf('DataFilesClass.ErrorCheck - "%s" WARNING:\n%s\n', obj.files(ii).name, o.GetErrorMsg()));
+                    end
                 end
                 if ~isempty(o.GetErrorMsg())
                     obj.files(ii).SetError(o.GetErrorMsg());

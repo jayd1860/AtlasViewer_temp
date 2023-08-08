@@ -1,6 +1,8 @@
-function probe = convertSD2probe(SD)
-
-probe = initProbe();
+function probe = convertSD2probe(SD, handles)
+if ~exist('handles','var')
+    handles = [];
+end
+probe = initProbe(handles);
 if nargin == 0
     return;
 end
@@ -17,7 +19,7 @@ end
 if ~isempty(SD.DetPos3D)
     probe.detpos = SD.DetPos3D;
 else
-	probe.detpos = SD.DetPos;
+probe.detpos = SD.DetPos;
 end
 if ~isempty(SD.DummyPos3D)
     probe.registration.dummypos = SD.DummyPos3D;

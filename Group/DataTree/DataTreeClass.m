@@ -570,30 +570,8 @@ classdef DataTreeClass <  handle
         
         % ----------------------------------------------------------
         function ErrorCheckLoadedFiles(obj)
-            maxWarningsDisplay = 25;
-            for iF = 1:length(obj.files)
-                if ~isempty(obj.files(iF).GetErrorMsg())
-                    if obj.errorStats(2) > maxWarningsDisplay
-                        continue
-                    end
-                    if isempty(obj.warnings)
-                        obj.warnings = sprintf('%s:   %s\n\n', obj.files(iF).name, obj.files(iF).GetErrorMsg());
-                    elseif obj.errorStats(2) < maxWarningsDisplay-1
-                        obj.warnings = sprintf('%s%s:   %s\n\n', obj.warnings, obj.files(iF).name, obj.files(iF).GetErrorMsg());
-                    elseif obj.errorStats(2) == maxWarningsDisplay-1
-                        obj.warnings = sprintf('%s  . . . Reached maximum number of warnings to display\n\n', obj.warnings);                        
-                    end
-                    if obj.files(iF).IsFile()
-                        obj.errorStats(2) = obj.errorStats(2)+1;
-                    end
-                else
-                    if obj.files(iF).IsFile()
-                        obj.errorStats(1) = obj.errorStats(1)+1;
-                    end
-                end
-            end
-            obj.errorStats(3) = length(obj.filesErr);
-
+            obj.GetErrorReport(false);
+            obj.GetErrorReport(true);            
             if isempty(obj.filesErr)
                 return
             end
@@ -606,13 +584,51 @@ classdef DataTreeClass <  handle
         end
         
         
+        
+        % ----------------------------------------------------------
+        function GetErrorReport(obj, err)
+            if err==true
+                files = obj.files;
+                erridx = 2;
+            else
+                files = obj.filesErr;
+                erridx = 3;
+            end
+            
+            maxWarningsDisplay = 25;
+            for iF = 1:length(files)
+                if ~isempty(files(iF).GetErrorMsg())
+                    if obj.errorStats(erridx) > maxWarningsDisplay
+                        continue
+                    end
+                    if isempty(obj.warnings)
+                        obj.warnings = sprintf('%s:   %s\n\n', files(iF).name, files(iF).GetErrorMsg());
+                    elseif obj.errorStats(2) < maxWarningsDisplay-1
+                        obj.warnings = sprintf('%s%s:   %s\n\n', obj.warnings, files(iF).name, files(iF).GetErrorMsg());
+                    elseif obj.errorStats(2) == maxWarningsDisplay-1
+                        obj.warnings = sprintf('%s  . . . Reached maximum number of warnings to display\n\n', obj.warnings);                        
+                    end
+                    if files(iF).IsFile()
+                        obj.errorStats(erridx) = obj.errorStats(erridx)+1;
+                    end
+                else
+                    if files(iF).IsFile()
+                        obj.errorStats(1) = obj.errorStats(1)+1;
+                    end
+                end
+            end
+        end
+
+        
+        
+        
         % ----------------------------------------------------------
         function w = GetWarningsReport(obj)
-            [nFileSuccess, nFilesWarning, nFilesFailed] = obj.GetErrorStats();
+            w = '';
+            [~, nFilesWarning, nFilesFailed] = obj.GetErrorStats();
             if ~isempty(obj.warnings)
-                obj.warnings = sprintf('The following %d files were loaded with warnings:\n=========================================\n%s', nFilesWarning, obj.warnings);
+                w = sprintf('The following %d files were loaded with error or warnings:\n=========================================\n%s', nFilesWarning + nFilesFailed, obj.warnings);
             end
-            w = obj.warnings;
         end
         
         

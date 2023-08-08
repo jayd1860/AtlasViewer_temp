@@ -39,7 +39,7 @@ if ishandles(h)
     hc = get(h, 'children');    
     for ii = 1:length(hc)
         if strcmpi(get(hc(ii), 'type'), 'axes')
-            set(hc(ii), 'units','characters');
+            set(hc(ii), 'units','characters', 'TitleHorizontalAlignment','left');
             
             p1 = get(h, 'position');
             p2 = get(hc(ii), 'position');
