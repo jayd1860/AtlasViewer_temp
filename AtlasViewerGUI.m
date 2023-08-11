@@ -1459,14 +1459,15 @@ end
 
 
 % --------------------------------------------------------------------
-function checkboxOptodeSDMode_Callback(~, ~, ~)
+function checkboxOptodeSDMode_Callback(~, eventdata, handles)
 global atlasViewer
 probe    = atlasViewer.probe;
 headsurf = atlasViewer.headsurf;
-
+if exist('eventdata','var') && iswholenum(eventdata)
+    set(handles.checkboxOptodeSDMode, 'value',eventdata)
+end
 probe = setOptodeNumbering(probe);
 probe = setProbeDisplay(probe, headsurf);
-
 atlasViewer.probe = probe;
 
 
@@ -3456,7 +3457,7 @@ atlasViewer.fwmodel = resetMC(atlasViewer.fwmodel);
 
 
 % --------------------------------------------------------------------
-function menuItemProbeDesignEditAV_Callback(hObject, eventdata, handles)
+function menuItemProbeDesignEditAV_Callback(hObject, ~, handles)
 global atlasViewer
 
 if ~isempty(atlasViewer.dataTree)
@@ -3496,13 +3497,9 @@ elseif strcmpi(get(handles.uipanelProbeDesignEdit,'Visible'),'Off')
     contents = cellstr(get(handles.popupmenuSelectOptodeType,'String'));
     selected_grommet_type = contents{get(handles.popupmenuSelectOptodeType,'Value')};
     if strcmpi(selected_grommet_type,'Source') || strcmpi(selected_grommet_type,'Detector')
-        set(handles.checkboxOptodeSDMode,'Value',1.0)
-        checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
-        set(handles.checkboxOptodeSDMode,'Enable','off')
+        checkboxOptodeSDMode_Callback(hObject, 1, handles)
     elseif strcmpi(selected_grommet_type,'Dummy')
-        set(handles.checkboxHideDummyOpts,'Value',0.0)
-        checkboxHideDummyOpts_Callback(hObject, eventdata, handles)
-        set(handles.checkboxOptodeSDMode,'Enable','off')
+        checkboxHideDummyOpts_Callback(hObject, 0, handles)
     end        
     set(headSurf, 'buttondownfcn', {@headsurf_btndwn,handles})
     if ~isempty(atlasViewer.probe.lambda)
@@ -3515,7 +3512,7 @@ end
 
 
 % --------------------------------------------------------------------
-function radiobuttonAddOptodeAV_Callback(hObject, eventdata, handles)
+function radiobuttonAddOptodeAV_Callback(hObject, ~, handles)
 global atlasViewer
 set(handles.radiobuttonAddOptodeAV,'Value',1.0)
 set(handles.radiobuttonRemoveOptodeAV,'Value',0.0)
@@ -3532,14 +3529,10 @@ set(handles.edit_assignAnchorPt,'String','none');
 contents = cellstr(get(handles.popupmenuSelectOptodeType,'String'));
 selected_grommet_type = contents{get(handles.popupmenuSelectOptodeType,'Value')};
 if strcmpi(selected_grommet_type,'Source') || strcmpi(selected_grommet_type,'Detector')
-    set(handles.checkboxOptodeSDMode,'Value',1.0)
-    checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
+    checkboxOptodeSDMode_Callback(hObject, 1, handles)
 elseif strcmpi(selected_grommet_type,'Dummy')
-    set(handles.checkboxHideDummyOpts,'Value',0.0)
-    checkboxHideDummyOpts_Callback(hObject, eventdata, handles)
+    checkboxHideDummyOpts_Callback(hObject, 0, handles)
 end
-set(handles.checkboxOptodeSDMode,'Enable','off')
-
 if isfield(atlasViewer.probe.handles,'hSprings_editOptode')
     if ishandles(atlasViewer.probe.handles.hSprings_editOptode)
         delete(atlasViewer.probe.handles.hSprings_editOptode);
@@ -3551,7 +3544,6 @@ if isfield(atlasViewer.probe.handles,'hMeasList_editOptode')
         delete(atlasViewer.probe.handles.hMeasList_editOptode);
     end
 end
-
 set(handles.popupmenuSelectOptodeType,'Enable','on');
 set(handles.popupmenu_selectGrommetType,'Enable','on');
 set(handles.edit_assignAnchorPt,'Enable','off');
@@ -3574,8 +3566,7 @@ if isfield(atlasViewer.probe,'editOptodeInfo')
 end
 set(handles.edit_assignAnchorPt,'String','none');
 
-set(handles.checkboxOptodeSDMode,'Value',1.0)
-checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
+checkboxOptodeSDMode_Callback(hObject, 1, handles)
 
 if isfield(atlasViewer.probe.handles,'hSprings_editOptode')
     if ishandles(atlasViewer.probe.handles.hSprings_editOptode)
@@ -3588,7 +3579,6 @@ if isfield(atlasViewer.probe.handles,'hMeasList_editOptode')
         delete(atlasViewer.probe.handles.hMeasList_editOptode);
     end
 end
-set(handles.checkboxOptodeSDMode,'Enable','off')
 set(handles.popupmenuSelectOptodeType,'Enable','off');
 set(handles.popupmenu_selectGrommetType,'Enable','off');
 set(handles.edit_assignAnchorPt,'Enable','off');
@@ -3616,13 +3606,10 @@ ndet = atlasViewer.probe.ndet;
 contents = cellstr(get(handles.popupmenuSelectOptodeType,'String'));
 selected_optode_type = contents{get(handles.popupmenuSelectOptodeType,'Value')};
 if strcmpi(selected_optode_type,'Source') || strcmpi(selected_optode_type,'Detector')
-    set(handles.checkboxOptodeSDMode,'Value',1.0)
-    checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
+    checkboxOptodeSDMode_Callback(hObject, 1, handles)
 elseif strcmpi(selected_optode_type,'Dummy')
-    set(handles.checkboxHideDummyOpts,'Value',0.0)
-    checkboxHideDummyOpts_Callback(hObject, eventdata, handles)
+    checkboxHideDummyOpts_Callback(hObject, 0, handles)
 end
-set(handles.checkboxOptodeSDMode,'Enable','off')
 
 if get(handles.radiobuttonEditOptodeAV,'Value') && isfield(atlasViewer.probe,'editOptodeInfo')
     idx = atlasViewer.probe.editOptodeInfo.currentOptode;
@@ -4300,9 +4287,7 @@ if eventdata.Button == 1
                     if ~isempty(ml)
                         [ml,ia,~] = unique(ml(:,1:2),'rows');
                         if ~ get(handles.checkboxOptodeSDMode,'Value')
-                            set(handles.checkboxOptodeSDMode,'Value',1.0)
-                            checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
-                            set(handles.checkboxOptodeSDMode,'Enable','off')
+                            checkboxOptodeSDMode_Callback(hObject, 1, handles)
                         end
                         if strcmp(opt_type,'Source')
                             m_idx = find(ml(:,1) ==  opt_no);
@@ -4338,11 +4323,6 @@ if eventdata.Button == 1
                     
                 elseif get(handles.radiobutton_SpringListVisible,'Value')
                     if ~isempty(sl)
-                        if get(handles.checkboxOptodeSDMode,'Value')
-                            set(handles.checkboxOptodeSDMode,'Value',0.0)
-                            checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
-                            set(handles.checkboxOptodeSDMode,'Enable','off')
-                        end
                         s_idx = find(sl(:,1)==idx |sl(:,2)==idx);
                         if ~isempty(s_idx)
                             data = cell(length(s_idx),3);
@@ -4477,8 +4457,7 @@ function radiobutton_SpringListVisible_Callback(hObject, eventdata, handles)
 global atlasViewer
 set(handles.radiobutton_SpringListVisible,'Value',1.0)
 set(handles.radiobutton_MeasListVisible,'Value',0.0)
-set(handles.checkboxOptodeSDMode,'Value',0.0)
-checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
+checkboxOptodeSDMode_Callback(hObject, 0, handles)
 if get(handles.checkbox_displayAllOptodes,'Value')
     checkbox_displayAllOptodes_Callback(hObject, eventdata, handles)
 else
@@ -4508,9 +4487,8 @@ else
         set(handles.uipanel_EditOptode,'Units','normalized','Position',[0.77 0.45 0.2 0.465])
         set(handles.uitable_editMLorSL,'Data',data)
         set(handles.uitable_editMLorSL,'ColumnName',{'Optode1','Optode2','Distance'})
-    end
-    set(handles.checkboxOptodeSDMode,'Enable','off')
-        set(handles.text_changeOptodeNumber,'Enable','Off');
+    end    
+    set(handles.text_changeOptodeNumber,'Enable','Off');
     set(handles.popupmenu_changeOptodeNumberTo,'Enable','Off');
 end
 
@@ -4521,12 +4499,11 @@ function radiobutton_MeasListVisible_Callback(hObject, eventdata, handles)
 global atlasViewer
 set(handles.radiobutton_SpringListVisible,'Value',0.0)
 set(handles.radiobutton_MeasListVisible,'Value',1.0)
-set(handles.checkboxOptodeSDMode,'Value',1.0)
-checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
+checkboxOptodeSDMode_Callback(hObject, 1, handles)
 if get(handles.checkbox_displayAllOptodes,'Value')
     checkbox_displayAllOptodes_Callback(hObject, eventdata, handles)
 else
-    if isfield(atlasViewer.probe,'editOptodeInfo') & isfield( atlasViewer.probe.editOptodeInfo,'currentOptode')
+    if isfield(atlasViewer.probe,'editOptodeInfo') && isfield( atlasViewer.probe.editOptodeInfo,'currentOptode')
         ml = atlasViewer.probe.ml;
         if ~isempty(ml)
         [ml,ia,ic] = unique(ml(:,1:2),'rows');
@@ -4585,7 +4562,6 @@ else
         set(handles.uitable_editMLorSL,'Data',data)
         set(handles.uitable_editMLorSL,'ColumnName',{'Source','Detector','Distance'})
     end
-    set(handles.checkboxOptodeSDMode,'Enable','off')
     set(handles.text_changeOptodeNumber,'Enable','On');
     set(handles.popupmenu_changeOptodeNumberTo,'Enable','On');
 end
@@ -4839,8 +4815,7 @@ if get(handles.checkbox_displayAllOptodes,'Value')
         data = atlasViewer.probe.registration.sl; 
         set(handles.radiobutton_SpringListVisible,'Value',1.0)
         set(handles.radiobutton_MeasListVisible,'Value',0.0)
-        set(handles.checkboxOptodeSDMode,'Value',0.0)
-        checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
+        checkboxOptodeSDMode_Callback(hObject, 0, handles)
         col1_name = 'Optode1';
         col2_name = 'Optode2';
         set(handles.checkboxHideSprings,'Value',0.0)
@@ -4868,8 +4843,7 @@ if get(handles.checkbox_displayAllOptodes,'Value')
             data(:,2) = data(:,2)-nrsc;
             set(handles.radiobutton_SpringListVisible,'Value',0.0)
             set(handles.radiobutton_MeasListVisible,'Value',1.0)
-            set(handles.checkboxOptodeSDMode,'Value',1.0)
-            checkboxOptodeSDMode_Callback(hObject, eventdata, handles)
+            checkboxOptodeSDMode_Callback(hObject, 1, handles)
             probe = atlasViewer.probe;
             probe.hideMeasList = 1;
             set(handles.checkboxHideMeasList,'Value',0.0)
